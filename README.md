@@ -1,5 +1,5 @@
 # crosslink
- Network Visualization of Grouped Nodes
+Visualization of Network with Grouped Nodes
 
 # To-Do List
 ## Must be done
