@@ -6,7 +6,7 @@
 #' @param group a vector with equal length of x, providing group information of elements in x
 #' @param drop drop levels of x
 #'
-#' @return a list
+#' @return a list. Order of elements is controled by levels of group.
 #' @export
 #'
 #' @examples
@@ -26,7 +26,7 @@ tolist_by_group <- function(x, group, drop = F) {
 #' @param list a list with equal length of its each element
 #'
 #' @return data.frame
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' todataframe_by_list(list(num = c(1:10), cat = c(rep("A", 5), rep("B", 5))))
@@ -88,27 +88,29 @@ segment_range <- function(range = c(0, 1), n, scale = NA, return.cutter = T){
 #' convert a vector of characters to a vector of numeric coordinates
 #'
 #' @param x a vector of characters, which will be coerced into factor.
-#' @param scale a vector of \code{length(x) + 1} numeric values to control adjacent spacing and flanks (the first and the last values). Set NA or NULL for equally dividing.
+#' @param scale a vector of \code{length(x) - 1} numeric values to control adjacent spacing. Set NA or NULL for equally dividing.
 #' @param range a vector of 2 numeric values defining a interval, where \code{x} will be mapped.
 #'
 #' @return a vector of length(x)
 #' @export
 #'
 #' @examples
-#' vector_to_coord(1:4, scale = c(1,2,2,2,1), range(1, 9))
-vector_to_coord <- function(x, scale = NA, range = c(0, 1)){ # scale = x+1  in length
+#' vector_to_coord(1:4, scale = c(2,2,2), range(1, 9))
+#'
+vector_to_coord <- function(x, scale = NA, range = c(0, 1)){ # scale = x-1  in length
   x <- factor(x)
   segment_range(
-    range = range, n = length(levels(x)) + 1,
-    scale = scale, return.cutter = T)[x]
+    range = range, n = length(levels(x)) - 1,
+    scale = scale, return.cutter = F)[x]
 }
 
 #' a helper function to get names by integer indexes from data.frame or list
 #'
 #' @param x a data.frame or a list
-#' @param ind a vector of integer indexes, whose element must be smaller than length of \code{x}
+#' @param ind a vector of integer indexes or colnames of \code{x}
 #'
 #' @return a vector of characters
+#' @keywords internal
 #'
 #' @examples
 #' index_to_name(data.frame(A = 1, B = 2), 1)
@@ -124,208 +126,23 @@ index_to_name <- function(x, ind){
   if(all(ind %in% names(x)))
     return(ind)
   else
-    stop("index is not in names of x")
+    stop("index is not all in names of x")
 }
 
 
 
-#' generate a 3*3 matrix for affine transformation
+#' use a vector repeatedly to generate a new vector of the specified length
 #'
-#' @param type a affine transformation type
-#' @param x transform value along x axis, used for
-#' @param y transform value along y axis, used for
-#' @param theta transform value of angle, usually in 0 to 2pi
-#' @param counterclockwise control directions of theta or x,y if type is "shear"
+#' @param x a vector to be used repeatedly
+#' @param n length of the new generated vector
+#' @param unlist unlist \code{x} before repeatedly being used
 #'
-#' @return a 3*3 matrix
-#' @description
-#' See the following urls to learn more about 2D affine and perspective tranformation matrix:
-#' https://en.wikipedia.org/wiki/Transformation_matrix
-#' https://www.cnblogs.com/bnuvincent/p/6691189.html
-#' \code{Rconic::`Affine planar transformations matrix`}
-#'
-#' Used arguments for different types:
-#' none: ignore everything
-#' translate: x, y
-#' scale: x, y
-#' rotate: x, y, theta (angle of the rotation)
-#' shear: x, y
-#' reflect: x, y, theta (angle from x axis)
-#'
-#'
+#' @return a vector of \code{n} length
 #' @export
 #'
 #' @examples
+#' coerce_x_len(1, 10)
 #'
-#' # eigen matrix
-#' transform_matrix_affine(type = "none")
-#'
-#' # shift matrix for convert c(0, 0) to c(1, 2)
-#' mat <- transform_matrix_affine(type = "translate", x = 1, y = 2)
-#' mat %*% c(0, 0, 1)
-#'
-#' # rotation matrix for convert c(0, 0) to c(0, 2)
-#' mat <- transform_matrix_affine(type = "rotate", x = 1, y = 1, theta = pi/2)
-#' mat %*% c(0, 0, 1)
-#'
-#' # shear for convert c(1, 1) to c(2, 1) if along x or c(1, 2) if along y
-#' mat <- transform_matrix_affine(type = "shear", x = pi*45/180, y = 0)
-#' mat <- transform_matrix_affine(type = "shear", x = 0, y = pi*45/180, counterclockwise = T)
-#'
-#' # reflect for convert c(0, 0) to c(2, 2)
-#' mat <- transform_matrix_affine(type = "reflect", x = 1, y = 1, theta = pi*45/180)
-#'
-transform_matrix_affine <- function(
-  type = c("none", "translate", "scale", "rotate", "shear", "reflect"),
-  x = 0, y = 0, theta = NA, counterclockwise = FALSE){
-  # none: ignore everything
-  # translate: x, y
-  # scale: x, y
-  # rotate: x, y, theta (angle of the rotation)
-  # shear: x, y
-  # reflect: x, y, theta (angle with x axis)
-  if(counterclockwise) theta <- -theta
-  switch(
-    match.arg(arg = type, several.ok = FALSE),
-    none = transform_matrix(),
-    translate = transform_matrix(c = x, f = y),
-    scale = transform_matrix(a = x, e = y),
-    rotate = {
-      if(!is.numeric(theta)) stop("parameter theta must be numeric for ROTATE!")
-      transform_matrix(c = x, f = y) %*%
-        transform_matrix(a = cos(theta), b = sin(theta), d = -sin(theta), e = cos(theta)) %*%
-        transform_matrix(c = -x, f = -y)
-    },
-    shear = transform_matrix(b = tan(x * ifelse(counterclockwise, -1, 1)),
-                             d = tan(-y * ifelse(counterclockwise, -1, 1))),
-    reflect = {
-      if(is.na(theta) || is.null(theta)){
-        transform_matrix(c = x, f = y) %*%
-          transform_matrix(a = -1, e = -1) %*%
-          transform_matrix(c = -x, f = -y)
-      }else{
-        transform_matrix(c = x, f = y) %*%
-          transform_matrix(a = cos(theta), b = sin(theta), d = -sin(theta), e = cos(theta)) %*%
-          transform_matrix(a = 1, e = -1) %*%
-          transform_matrix(a = cos(-theta), b = sin(-theta), d = -sin(-theta), e = cos(-theta)) %*%
-          transform_matrix(c = -x, f = -y)
-      }
-    }
-  )
-}
-
-#' a helper function for 3*3 matrix
-#'
-#' @param a 1st value of 3*3 matrix
-#' @param b 2nd value of 3*3 matrix
-#' @param c 3rd value of 3*3 matrix
-#' @param d 4th value of 3*3 matrix
-#' @param e 5th value of 3*3 matrix
-#' @param f 6th value of 3*3 matrix
-#' @param g 7th value of 3*3 matrix
-#' @param h 8th value of 3*3 matrix
-#' @param i 9th value of 3*3 matrix
-#'
-#' @return a 3*3 matrix as follows:
-#' matrix(
-#' a, b, c
-#' d, e, f
-#' g, h, i
-#' )
-#'
-#' @export
-#'
-#' @examples
-#' transform_matrix(a = 2, e = 2, i = 2)
-#'
-transform_matrix <- function(
-  a = 1, b = 0, c = 0,
-  d = 0, e = 1, f = 0,
-  g = 0, h = 0, i = 1){
-  matrix(c(a, b, c, d, e, f, g, h, i), nrow = 3, byrow = TRUE)
-}
-
-
-#' Transfrom 2D coordinates according to a affine transformation matrix
-#'
-#' @param x a vector of coordinates at x axis or a data.frame if y is NULL
-#' @param y a vector of coordinates at y axis or NULL
-#' @param matrix a 3*3 affine transformation matrix
-#'
-#' @return a matrix of transformed coordinates
-#' @export
-#'
-#' @examples
-#' # coordinate for a unit square
-#' us <- expand.grid(c(0,1), c(0,1))[c(1,3,4,2),]
-#' us_tf <- transform_by_matrix(x = us, matrix = transform_matrix_affine("rotate", x = 0, y =0, theta = pi/4))
-#' library(ggplot2)
-#' library(magrittr)
-#' ggplot() +
-#'   geom_polygon(mapping = aes(x = us[,1], y = us[,2]), fill = "blue", alpha = 0.3) +
-#'   geom_point(mapping = aes(x = us[,1], y = us[,2]), color = "blue", size = 3) +
-#'   geom_polygon(mapping = aes(x = us_tf[,1], y = us_tf[,2]), fill = "red", alpha = 0.3) +
-#'   geom_point(mapping = aes(x = us_tf[,1], y = us_tf[,2]), color = "red", size = 3) +
-#'   geom_segment(mapping = aes(x = us[,1], y = us[,2], xend = us_tf[,1], yend = us_tf[,2]),
-#'                color = "black", linetype = "dotted", size = 1, arrow = arrow(type = "closed", length = unit(0.03, "native"))) +
-#'   coord_fixed()
-#'
-transform_by_matrix <- function(x, y = NULL, matrix = transform_matrix_affine("none")){
-  if(is.null(y)) {
-    df <- as.data.frame(x)
-    x <- df[[1]]
-    y <- df[[2]]
-  }
-  t(matrix %*% t(as.matrix(data.frame(x = x, y = y, 1))))[,c(1,2)]
-}
-
-#' Title
-#'
-#' @param x
-#' @param y
-#' @param fun
-#' @param along
-#' @param xrange.to
-#' @param xrange.from
-#' @param yrange.to
-#' @param yrange.from
-#'
-#' @return
-#' @export
-#'
-#' @examples
-transform_by_fun <- function(
-  x = NULL, y = NULL, fun, along = c("x", "y", "xy"),
-  xrange.to = NULL, xrange.from = NULL,
-  yrange.to = NULL, yrange.from = NULL){
-  along <- match.arg(arg = along)
-
-  xrange.to <- nullna_default(xrange.to, range(x, na.rm =TRUE, finite = TRUE))
-  yrange.to <- nullna_default(yrange.to, range(y, na.rm =TRUE, finite = TRUE))
-  xrange.from <- nullna_default(xrange.from, range(x, na.rm =TRUE, finite = TRUE))
-  yrange.from <- nullna_default(yrange.from, range(y, na.rm =TRUE, finite = TRUE))
-
-  x <- scales::rescale(x, xrange.to, xrange.from)
-  y <- scales::rescale(y, yrange.to, yrange.from)
-
-  switch(
-    along,
-    x = data.frame(x = x, y = y + fun(x)),
-    y = data.frame(x = x + fun(y), y = y),
-    xy = fun(x, y) # return data.frame of x,y
-    )
-}
-
-#' Title
-#'
-#' @param x
-#' @param n
-#' @param unlist
-#'
-#' @return
-#' @export
-#'
-#' @examples
 coerce_x_len <- function(x, n, unlist = T){
   if(unlist) x <- unlist(x)
   if (length(x) < n) x <- rep(x, ceiling(n/length(x))) # extend if x length less than n
@@ -334,20 +151,372 @@ coerce_x_len <- function(x, n, unlist = T){
 
 
 
-#' Title
+#' Create a list along given names and default values
 #'
-#' @param names
-#' @param default
-#' @param init
+#' It can be useful to create an list with default values and some settable values. This is similar to the idea of seq_along(), which creates a vector of the same length as its input.
 #'
-#' @return
+#' @param names names of the list to be generated
+#' @param default default value for each element of the generated list
+#' @param some a list with elements whose names should be included in \code{names}, use this to set default values for some elements of the generated list
+#'
+#' @return a list
 #' @export
 #'
 #' @examples
-list_along <- function(names, default = NA, init = NA){
-  x <- rep(list(init), length(names))
+#' list_along(names = c("A", "B", "C"), default = NA, some = list(B = 1))
+#'
+list_along <- function(names, default = NA, some = NA){
+  x <- rep(list(default), length(names))
   names(x) <- names
-  inter_names <- intersect(names(default), names)
-  x[inter_names] <- default[inter_names]
+  inter_names <- intersect(names(some), names)
+  x[inter_names] <- some[inter_names]
   return(x)
+}
+
+
+#' Merge two list
+#'
+#' @param x one list
+#' @param y another list. Elements having same names in \code{x} will be override by those in \code{y}.
+#'
+#' @return a merged list
+#' @export
+#'
+#' @examples
+#' merge_list(list(1, A = 2, B = 3, 4), list(A = 22, 5, 1))
+merge_list <- function(x, y){
+  x <- c(y, x)
+  if (is.null(names(x)))
+    return(x)
+  else
+    return(x[!duplicated(names(x)) | names(x) == ""])
+}
+
+#' generate a toy CrossLink object
+#'
+#' @param n_cross the number of crosses (columns)
+#' @param n_link a vector of numbers of links between crosses
+#' @param n_node a vector of numbers of nodes in each cross
+#' @param seed random seed for random links
+#'
+#' @return a CrossLink object
+#' @export
+#'
+#' @examples
+#'
+gen_demo <- function(n_cross = 2, n_link = c(10), n_node = c(3,4), seed = 6){
+  nodes <- data.frame(
+    key = paste0(rep(LETTERS[seq_len(n_cross)], n_node),
+                 unlist(sapply(n_node, seq_len))),
+    type = rep(LETTERS[seq_len(n_cross)], n_node))
+  crosses <- tolist_by_group(nodes$key, nodes$type)
+
+  edges <- NULL
+  set.seed(seed)
+  for(i in seq_along(n_link)){
+    edges = rbind(edges, data.frame(
+      src = sample(crosses[[i]], n_link[i], replace = T),
+      tar = sample(crosses[[i + 1]], n_link[i], replace = T)
+    ))
+  }
+  return(list(nodes = nodes, edges = edges, cross.by = "type"))
+}
+
+
+#' Override default aes with new aes
+#'
+#' @param aes input aes
+#' @param default_aes aes with some default values
+#'
+#' @return a updated aes
+#' @import rlang
+#' @export
+#'
+#' @examples
+#'
+override_aes <- function(mapping = NULL, default_aes){
+  x <- merge_list(lapply(default_aes, rlang::quo_get_expr),
+                         lapply(mapping, rlang::quo_get_expr))
+
+  new_aesthetic <- function (x, env = globalenv()) {
+    if (is_quosure(x)) {
+      if (!quo_is_symbolic(x)) {
+        x <- quo_get_expr(x)
+      }
+      return(x)
+    }
+    if (is_symbolic(x)) {
+      x <- new_quosure(x, env = env)
+      return(x)
+    }
+    x
+  }
+  x <- lapply(x, new_aesthetic, env = parent.frame())
+  structure(x, class = "uneval")
+}
+
+#' convert degree to radian
+#'
+#' @param degree angle in degree
+#'
+#' @return angle in radian
+#' @export
+#'
+#' @examples
+#' degree_to_radian(180)
+#'
+degree_to_radian <- function(degree) {
+  pi*degree/180
+}
+
+#' convert radian to degree
+#'
+#' @param radian angle in radian
+#'
+#' @return angle in degree
+#' @export
+#'
+#' @examples
+#' degree_to_radian(pi)
+#'
+radian_to_degree <- function(radian) {
+  180*radian/pi
+}
+
+#' get values by interval inclusion
+#'
+#' @param x a vector of values
+#' @param interval the range of inclusion to be appied
+#' @param inclusion defining inclusion
+#'
+#' @return a vector
+#' @export
+#'
+#' @examples
+#' x <- seq(0, 1, length.out = 9)
+#' interval_inclusion(x, interval = c(0.5, 1), inclusion = "left")
+#' interval_inclusion(x, interval = c(0.5, 1), inclusion = "right")
+#' interval_inclusion(x, interval = c(0.5, 1), inclusion = "both")
+#' interval_inclusion(x, interval = c(0.5, 1), inclusion = "neither")
+#'
+interval_inclusion <- function(x, interval = NULL, inclusion = c("left", "both", "right","neither")){
+  inclusion <- match.arg(inclusion)
+  left_inc <- get(">")
+  right_inc <- get("<")
+  if(inclusion %in% c("both", "left")) left_inc <- get(">=")
+  if(inclusion %in% c("both", "right")) right_inc <- get("<=")
+
+  if(is.null(interval)) interval <- range(x)
+  x[left_inc(x, interval[1]) & right_inc(x, interval[2])]
+}
+
+#' get period variables with same return value
+#'
+#' @param x a vector of variables in one period
+#' @param period the period
+#' @param range the range in which variables (usually with the same values with x) will be returned
+#' @param range.inclusion left or right inclusion for \code{range}
+#' @param simplify return list or not, see \code{\link{sapply}}
+#'
+#' @return a vector
+#' @export
+#'
+#' @examples
+#' period_variable(pi, 2*pi, c(-pi, 5*pi))
+#'
+period_variable <- function(x, period, range = c(0, period), range.inclusion = c("left", "both","right", "neither"), simplify = F){
+  x <- unique(x - period*floor(x/period)) # 0 to period range
+  inc <- match.arg(range.inclusion)
+  sapply(x, function(y) {
+    y <- y + period * floor(range[1]/period):ceiling(range[2]/period)
+    interval_inclusion(y, interval = range, inclusion = inc)
+  }, simplify = simplify)
+}
+
+
+#' get arc-trigonometric values in periods
+#'
+#' @param x trigonometric values
+#' @param y used for atan2 function. see \code{\link{atan2}}
+#' @param arc.fun arc-trigonometric function
+#' @param return.range set NULL for a range of 0 to 2*pi.
+#'
+#' @return angles in radian
+#' @export
+#'
+#' @examples
+#'
+
+period_arcTrig <- function(x, y = NULL, arc.fun = c("acos", "asin", "atan", "atan2"), return.range = NULL){
+  arc.fun <- match.arg(arc.fun)
+  if(is.null(return.range)) return.range <- c(0, 2*pi)
+
+  radian <- switch(
+    arc.fun,
+    acos = c(acos(x), 2*pi - acos(x)), # 0 to pi
+    asin = c(asin(x), pi - asin(x)), # -pi/2 to pi/2
+    atan = atan(x), # -pi/2 to pi/2
+    atan2 = atan2(y, x)) # 0 to pi
+  period <- switch(
+    arc.fun,
+    acos = 2*pi, # 0 to pi
+    asin = 2*pi, # -pi/2 to pi/2
+    atan = pi, # -pi/2 to pi/2
+    atan2 = pi) # 0 to pi
+
+  period_variable(unique(radian), period = period, range = return.range, range.inclusion = "left", simplify = T)
+}
+
+#' Get its center, radius and angle from a circle's string
+#'
+#' @param x,y,xend,yend start and end points defining a string of a circle
+#' @param radian angle of the string.
+#' @param radius radius of the circle. Only used if \code{radian} is NULL or 2*pi.
+#'
+#' @return a list of center, radius, string.start, string.end, angle, angle.start, angle.end
+#' @details For a string, given its radian or radius, there will be two circle
+#' centers matched. This function will return both centers in a order of left
+#' center and right center. For brevity, the radian will always less than pi (0-2*pi).
+#'
+#' @export
+#'
+#' @examples
+#' string_to_circle(-1, 0, 1, 0, pi)
+#' string_to_circle(-1, 0, 1, 0, pi/2)
+#' string_to_circle(0, 1, 0, -1, pi/2)
+#'
+string_to_circle <- function(x, y, xend, yend, radian = NULL, radius = NULL) {
+  d <- sqrt((xend - x)^2 + (yend - y)^2)
+  if(is.null(radian) || is.na(radian)){
+    if(is.null(radius) || is.na(radius)) stop("Either radian or radius should be setted!")
+    if(radius < d/2) {
+      warning("radius is too small and is coerced to string/2!")
+      radius <- d/2
+    }
+    radian <- nullna_default(radian, acos(1-d^2/radius^2/2)) # 0-pi
+  }else{
+    if(radian >= 2*pi && is.null(radius)) stop("Please also set radius!")
+    if(radian < 2*pi) radius <- d/sqrt(2*(1-cos(radian)))
+  }
+
+  l <- sqrt(radius^2 - (d/2)^2)
+  xc <- (x+xend)/2
+  yc <- (y+yend)/2
+  theta <- atan(-(xend-x)/(yend-y))
+
+  # left center
+  x1 <- xc-cos(theta)*l
+  y1 <- yc-sin(theta)*l
+
+  # right center
+  x2 <- xc+cos(theta)*l
+  y2 <- yc+sin(theta)*l
+
+  return(
+    list(radius = radius,
+         string.start = c(x, y),
+         string.start = c(xend, yend),
+         angle = ifelse(radian > pi, 2*pi-radian, radian),
+         left = list(center = c(x1, y1),
+                     angle.start = atan2(y-y1, x-x1),
+                     angle.end = atan2(yend-y1, xend-x1)),
+         right = list(center = c(x2, y2),
+                      angle.start = atan2(y-y2, x-x2),
+                      angle.end = atan2(yend-y2, xend-x2)))
+  )
+}
+
+
+#' project points to a circle
+#'
+#' @param x,y points to be projected
+#' @param x0,y0 circle center
+#' @param r radius of circle
+#' @param source projection type.
+#'
+#' @details
+#' Here, for sources of x or y, projected points will be at the right or up half circle;
+#' for sources of -x or -y, projected points will be at the left or down half circle
+#'
+#' @return data.frame of coordinates of projected points
+#' @export
+#'
+#' @examples
+#'
+circle_projector <- function(x, y, x0 = 0, y0 = 0, r = 1, source = c("x", "y", "-x", "-y", "center")){
+  source <- match.arg(source)
+  if(source == "center"){
+    theta <- atan2(y-y0, x-x0)
+    return(
+      data.frame(x = x0 + r*cos(theta),
+               y = y0 + r*sin(theta))
+    )
+  }
+  if(source == "x"){
+    return(
+      data.frame(
+      x = x0+r*cos(asin((y-y0)/r)),
+      y = y)
+    )
+  }
+  if(source == "y"){
+    return(
+      data.frame(
+      x = x,
+      y = y0+r*sin(acos((x-x0)/r)))
+    )
+  }
+  if(source == "-x"){
+    return(
+      data.frame(
+      x = x0-r*cos(asin((y-y0)/r)),
+      y = y)
+    )
+  }
+  if(source == "-y"){
+    return(
+      data.frame(
+      x = x,
+      y = y0-r*sin(acos((x-x0)/r)))
+    )
+  }
+
+}
+
+
+#' a theme for crosslink plot
+#'
+#' @param gg a ggplot object
+#'
+#' @return an updated ggplot object
+#' @export
+#'
+#' @examples
+#'
+cl_void <- function(gg) {
+  base_size <- 11
+  half_line <- base_size/2
+  gg + theme(line = element_blank(), rect = element_blank(),
+             text = element_text(family = "", face = "plain",
+                                 colour = "black", size = base_size, lineheight = 0.9,
+                                 hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(),
+                                 debug = FALSE), axis.text = element_blank(), axis.title = element_blank(),
+             axis.ticks.length = unit(0, "pt"), axis.ticks.length.x = NULL,
+             axis.ticks.length.x.top = NULL, axis.ticks.length.x.bottom = NULL,
+             axis.ticks.length.y = NULL, axis.ticks.length.y.left = NULL,
+             axis.ticks.length.y.right = NULL, legend.box = NULL,
+             legend.key.size = unit(1.2, "lines"), legend.position = "right",
+             legend.text = element_text(size = rel(0.8)), legend.title = element_text(hjust = 0),
+             strip.text = element_text(size = rel(0.8)), strip.switch.pad.grid = unit(half_line/2,
+                                                                                      "pt"), strip.switch.pad.wrap = unit(half_line/2,
+                                                                                                                          "pt"), panel.ontop = FALSE, panel.spacing = unit(half_line,
+                                                                                                                                                                           "pt"), plot.margin = unit(c(0, 0, 0, 0), "lines"),
+             plot.title = element_text(size = rel(1.2), hjust = 0,
+                                       vjust = 1, margin = margin(t = half_line)), plot.title.position = "panel",
+             plot.subtitle = element_text(hjust = 0, vjust = 1, margin = margin(t = half_line)),
+             plot.caption = element_text(size = rel(0.8), hjust = 1,
+                                         vjust = 1, margin = margin(t = half_line)), plot.caption.position = "panel",
+             plot.tag = element_text(size = rel(1.2), hjust = 0.5,
+                                     vjust = 0.5), plot.tag.position = "topleft",
+             complete = TRUE)
 }

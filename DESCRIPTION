@@ -1,11 +1,17 @@
 Package: crosslink
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Visualize the Network of Grouped Nodes
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Zongcheng Li
+Maintainer: Zongcheng Li <lizc07@vip.qq.com>
+Description: Visualization for Network of Grouped Nodes. 
+    Class CrossLink and several methods were implemented to map nodes and edges into the cartesian coordinates, and to easily perform transformation by affine matrix or function mapping (eg. sin/cos, etc).
+    Coordinates data could be achieved from CrossLink object, which could be visualized using ggplot2 (eg. geom_point/text/segment, etc.).
+    Several useful layouts also being built-in defined, such as column, row, hive, circle, arc, polygon. Users can also custom their own preferred layouts easily using built-in transformation functions.
+Imports: ggplot2, magrittr
+Depends: ggplot2
+License: GPL-2 | file LICENSE
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.1.1
+

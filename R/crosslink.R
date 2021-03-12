@@ -1,112 +1,138 @@
-# http://adv-r.had.co.nz/OO-essentials.html
+#' The CrossLink class
+#'
+#' This Class is designed to manipulate coordinates of nodes with groups and to
+#' visualize the crosslink network.
+#'
+#' Nodes and Edges formed a network, and in the so called crosslink network,
+#' Nodes in the same type will be placed in one column (named as a cross), and
+#' Edges is the links linking between crosses.
+#'
+#' @slot nodes data.frame for node data
+#' @slot edges data.frame for edge data
+#' @slot cross a list, saving nodes in each cross, initialized by \code{\link{crosslink}}
+#' @slot layout a list, saving different layout of coordinates of nodes in crosses.
+#' @slot active character, Name of the active, or default, layout; settable using \code{\link{cl_active}}
+#' @slot params list.
+#'
+#' @details
+#' cross: list names are inherited from cross.by in nodes; names' order (to control it using factor) is used as column order.
+#'
+#' layout: list names are layout names. For each layout, a data.frame is stored
+#' with node (key), node.type (node, top, bottom or header), x, y (coordinates), cross (which cross it belongs to).
+#'
+#' canvas: deprecated
+#'
+#' active: a layout name which is being used currently
+#'
+#' params: other params used for internal functions
+#'
 CrossLink <- setClass(
+  # http://adv-r.had.co.nz/OO-essentials.html
   "CrossLink",
   slots = c( # slots should be: logical TOC, layer by layer, minimize layers' depth (<= 3)
     nodes = "data.frame",
     edges = "data.frame",
     cross = "list",
     layout = "list", #
-    canvas = "list", #
-    active.layout = "character",
+    active = "character",
     params = "list"
   ))
 
-# edges A data frame containing a symbolic edge list in the first two columns. Additional columns are considered as edge attributes.
-# nodes A data frame with vertex metadata
-
-# I try to keep one function clean and simple, which should be friendly.
-# I prefere using %>% to pipe functions, and this way should be more intuitive and easy to use.
-CrossLink <- function(
-  nodes, edges,
-  cross.by,
-  cross.scale.gap = NA, # null or vector
-  cross.scale.spacing = NA, # na/null or list, partial match is supported
-  cross.header = NA, # NA default name, set NULL to not show headers. vector of length crosses
-  cross.header.pos = c(0.5, 1), # n times of 2
-  node.key.by = 1,
-  edge.source.by = 1,
-  edge.target.by = 2,
-  node.odd.rm = FALSE,
-  xrange = NULL,
-  yrange = NULL){
+#' Generator of class CrossLink
+#'
+#' Achieve a initialized CrossLink object by providing nodes, edges and cross.by.
+#'
+#' @param nodes a data frame with unique keys in the 1st (settable by \code{key.by}) column and metadata (used for aesthetic of nodes) in the other columns
+#' @param edges a data frame with source and target nodes in the first two (settable by \code{src.by} and \code{tar.by}) columns and other metadata.
+#' @param cross.by name of the column in \code{nodes} to be used to group nodes in different crosses. The order of crosses and nodes could be controlled by setting levels for corresponding columns in \code{nodes} using \code{\link{factor}} or \code{\link{forcats::fct_relevel}}
+#' @param gaps a numeric vector of n-1 length, n is equal to length of crosses (that is \code{length(object@crosses)}).
+#'  The gaps vector is c(gaps between adjacent crosses).
+#'  set NA to use equally divided gaps.
+#' @param spaces a named list of numeric vectors. The names must be names of crosses to be changed.
+#' And each vector is of n+1 length, n is equal to length of nodes in their belonging cross.
+#' The vector is c(top flank, spaces between adjacent nodes, bottom flank).
+#' set NA to use equally divided spaces.
+#' @param xrange,yrange canvas range
+#' @param key.by name or index of the column in \code{nodes} to be used as key of nodes
+#' @param src.by name or index of the column in \code{edges} to be used as source of links (edges)
+#' @param tar.by name or index of the column in \code{edges} to be used as target of links (edges)
+#' @param odd.rm remove odd nodes that are not included in edges (without links).
+#'
+#' @return a CrossLink object
+#' @export
+#'
+#' @examples
+#'
+crosslink <- function(
+  nodes, edges, cross.by, gaps = NA, spaces = NA, xrange = c(0, 10), yrange = c(0, 10),
+  key.by = 1, src.by = 1, tar.by = 2,
+  odd.rm = FALSE) {
+  # I try to keep one function clean and simple, which should be friendly.
+  # I prefere using %>% to pipe functions, and this way should be more intuitive and easy to use.
 
   # coerce to data.frame
   nodes <- as.data.frame(nodes)
   edges <- as.data.frame(edges)
 
   # default key index
-  node.key.by <- index_to_name(x = nodes, ind = node.key.by)
-  edge.source.by <- index_to_name(x = edges, ind = edge.source.by)
-  edge.target.by <- index_to_name(x = edges, ind = edge.target.by)
+  key.by <- index_to_name(x = nodes, ind = key.by)
+  src.by <- index_to_name(x = edges, ind = src.by)
+  tar.by <- index_to_name(x = edges, ind = tar.by)
   cross.by <- index_to_name(x = nodes, ind = cross.by)
 
   # clean nodes and edges
   nodes <- nodes[!is.na(nodes[[cross.by]]),] # remove nodes not included in crosses
-  edges <- edges[((edges[[edge.source.by]] %in% nodes[[node.key.by]]) & (edges[[edge.target.by]] %in% nodes[[node.key.by]])),]
+  edges <- edges[((edges[[src.by]] %in% nodes[[key.by]]) & (edges[[tar.by]] %in% nodes[[key.by]])),]
 
-  node_inedges <- unique(c(edges[[edge.source.by]], edges[[edge.target.by]]))
+  if(odd.rm) nodes <- nodes[(nodes[[key.by]] %in% edges[[src.by]]) | (nodes[[key.by]] %in% edges[[tar.by]]),]
+  # c(fct_x, fct_y) will coerce fct_x, and fct_y to numeric
 
-  if(node.odd.rm){
-    nodes <- nodes[nodes[[node.key.by]] %in% node_inedges,]
-  }
-
-  node_key <- nodes[[node.key.by]]
+  node_key <- nodes[[key.by]]
   node_crs <- nodes[[cross.by]]
 
   # check nodes uniqueness
-  if(!identical(node_key, unique(node_key))) stop("keys of nodes must be unique!")
+  if(anyDuplicated(node_key) != 0) stop("keys of nodes must be unique!")
 
   # cross
-  cross <- tolist_by_group(factor(node_key), node_crs, drop = T)
+  cross <- tolist_by_group(factor(node_key), node_crs, drop = T) # factor(x) will drop unused levels
 
   # range
-  xrange <- nullna_default(xrange, c(1, length(cross)))
-  yrange <- nullna_default(yrange, c(1, do.call(max, lapply(cross, length))))
+  # xrange <- c(0, length(cross)+1)
+  # yrange <- c(0, do.call(max, lapply(cross, length))+1)
+
+  # levels from up to down
+  cross_anchored <- sapply(names(cross), function(x){
+    x_nodes <- c(paste0(x, "_BOTTOM"),
+                 rev(levels(factor(cross[[x]]))),
+                 paste0(x, "_TOP"))
+    factor(x = x_nodes,
+           levels = x_nodes)
+    }, simplify = F, USE.NAMES = T)
 
   # layout
   layout <- list(
-    init = data.frame(
-      node = unlist(cross),
-      x = vector_to_coord(x = factor(rep(names(cross),
-                                         times = sapply(cross, length)),
-                                     levels = levels(factor(node_crs))),
-                          scale = cross.scale.gap,
-                          range = xrange),
-      y = do.call(c, mapply(FUN = vector_to_coord,
-                            x = cross,
-                            scale = list_along(names(cross), default = cross.scale.spacing),
-                            range = list_along(names(cross), init = yrange))),
-      cross = rep(names(cross),
-                  times = sapply(cross, length))
+    initial = data.frame(
+        node = unlist(cross_anchored),
+        node.type = unlist(lapply(cross_anchored, function(x) {c("bottom", rep("node", length(x)-2), "top")})),
+        x = vector_to_coord(x = factor(rep(names(cross_anchored),
+                                           times = sapply(cross_anchored, length)),
+                                       levels = levels(factor(node_crs))),
+                            scale = gaps,
+                            range = xrange),
+        y = do.call(c, mapply(FUN = vector_to_coord,
+                              x = cross_anchored,
+                              scale = list_along(names(cross_anchored), default = NA, some = spaces),
+                              range = list_along(names(cross_anchored), default = yrange),
+                              SIMPLIFY = F)),
+        cross = rep(names(cross_anchored),
+                    times = sapply(cross_anchored, length)))
     )
-  )
-
-  # cross.header
-  if(!is.null(cross.header)){
-    cross.header.pos <- coerce_x_len(cross.header.pos, 2*length(cross))
-    cross.header <- nullna_default(cross.header, names(cross))
-    cross.header <- data.frame(
-      cross = names(cross),
-      header = cross.header,
-      x = cross.header.pos[2*(seq_len(length(cross))) -1],
-      y = cross.header.pos[2*(seq_len(length(cross)))])
-  }
-
-
-  canvas <- list(
-    init = list(
-      xrange = xrange,
-      yrange = yrange,
-      cross.header = cross.header
-      )
-    )
-  active.layout <- "init"
 
   # params
   params <- list(
-    node.key.by = node.key.by,
-    edge.source.by = edge.source.by,
-    edge.target.by = edge.target.by,
+    key.by = key.by,
+    src.by = src.by,
+    tar.by = tar.by,
     cross.by = cross.by
   )
 
@@ -116,13 +142,23 @@ CrossLink <- function(
         edges = edges,
         cross = cross,
         layout = layout,
-        canvas = canvas,
-        active.layout = active.layout,
+        active = "initial",
         params = params)
     )
 }
 
-#
+
+
+
+#' Print the CrossLink object
+#'
+#' @param object a CrossLink object
+#'
+#' @return No value is returned.
+#' @keywords internal
+#'
+#' @examples
+#'
 setMethod(
   f = "show",
   signature = "CrossLink",
@@ -132,406 +168,510 @@ setMethod(
     n_edge <- nrow(object@edges)
     n_cross <- length(object@cross)
     cat(n_edge, "edges between", n_node, "nodes within", n_cross, "crosses\n")
-    cat("Active layout:", object@active.layout,"\n")
     cat("Layouts:", names(object@layout), "\n")
+    cat("Active:", object@active,"\n")
     }
   )
 
-#
-layouts <- function(object){
+
+
+
+#' Retrieve available layout names
+#'
+#' @param object a CrossLink object
+#' @return names of available layouts
+#' @export
+#'
+#' @examples
+#'
+cl_layouts <- function(object){
   names(object@layout)
 }
 
-#
-ActiveLayout <- function(object) {
-  object@active.layout
+#' Retrieve and Set active layout
+#'
+#' @name cl_active
+#'
+#' @param object a CrossLink object
+#' @param ret.data return layout data
+#'
+#' @return name or data of the active layout
+#' @export
+#'
+#' @examples
+#'
+cl_active <- function(object, ret.data = F) {
+  if(ret.data)
+    object@layout[[object@active]]
+  else
+    object@active
 }
 
-#
-`ActiveLayout<-` <- function(object, value) {
-    if(length(value) != 1) stop("value must be of length 1.")
-    if(value %in% names(object@layout)){
-      object@active.layout <- value
-      return(object)
-    }else{
-      stop(value, " is not in layout")
-    }
-}
-
-
-XRange <- function(object, layout = NULL){
-  object@canvas[[nullna_default(layout, ActiveLayout(object))]][["xrange"]]
-}
-YRange <- function(object, layout = NULL){
-  object@canvas[[nullna_default(layout, ActiveLayout(object))]][["yrange"]]
-}
-
-`XRange<-` <- function(object, layout = NULL, value){
-  if(length(value) != 2) stop("value must be of length 2.")
-  object@canvas[[nullna_default(layout, ActiveLayout(object))]][["xrange"]] <- value
-  return(object)
-}
-
-`YRange<-` <- function(object, layout = NULL, value){
-  if(length(value) != 2) stop("value must be of length 2.")
-  object@canvas[[nullna_default(layout, ActiveLayout(object))]][["yrange"]] <- value
-  return(object)
-}
-
-# layout and canvas are coupled.
-layout_copy <- function(object, from = "transforming", to = "transformed") {
-  layouts <- layouts(object)
-  if(!from %in% layouts) {
-    warning(from, " is not in layouts, nothing to be done!")
+#' @param value the name of a layout to be set as active
+#' @return an updated CrossLink object
+#' @export
+#' @rdname cl_active
+#'
+#' @examples
+#'
+`cl_active<-` <- function(object, value) {
+  if(length(value) != 1) stop("value must be of length 1.")
+  if(value %in% names(object@layout)){
+    object@active <- value
     return(object)
+  }else{
+    stop(value, " is not in layout")
   }
-  if(to %in% layouts){
-    warning(to, " is already in layouts, which will be overided!")
-  }
-  message("Copy layout ", from ," into ", to, ", and Set ActiveLayout as ", to)
-  object@layout[[to]] <- object@layout[[from]]
-  object@canvas[[to]] <- object@canvas[[from]]
-  ActiveLayout(object) <- to
-
-  return(object)
 }
 
-#
-tf_affine <- function(
-  object,
-  type = c("none", "translate", "scale", "rotate", "shear", "reflect"),
-  x = 0, y = 0, angle = NA, counterclockwise = FALSE,
-  by.each.cross = F,
-  crosses = NULL, # tf these crosses (names)
-  layout = "transforming"
-) {
-  active.layout <- object@active.layout
-  coord <- object@layout[[active.layout]]
-  canvas <- object@canvas[[active.layout]]
-  xrange <- XRange(object, layout = active.layout)
-  yrange <- YRange(object, layout = active.layout)
 
-  type <- match.arg(arg = type, several.ok = FALSE)
-  theta <- pi*angle/180
-
-  crosses <- nullna_default(crosses, names(object@cross))
-
-  if(by.each.cross){
-    n_cross <- length(crosses)
-    x <- coerce_x_len(x, n_cross)
-    y <- coerce_x_len(y, n_cross)
-    theta <- coerce_x_len(theta, n_cross)
-    counterclockwise <- coerce_x_len(counterclockwise, n_cross)
-
-    xrange_tf <- NULL
-    yrange_tf <- NULL
-    for (i in seq_len(n_cross)) {
-      ind <- which(coord$cross == crosses[[i]])
-      coord_i <- coord[ind, c("x", "y")]
-      # origin point
-      x0 <- scales::rescale(x[[i]], to = range(coord_i$x), from = c(0, 1))
-      y0 <- scales::rescale(y[[i]], to = range(coord_i$y), from = c(0, 1))
-
-      tf_fun_m <- function(m_xy, xx = x0, yy = y0) {
-        transform_by_matrix(
-          m_xy,
-          matrix = transform_matrix_affine(
-            type = type,
-            x = xx, y = yy, theta = theta[[i]],
-            counterclockwise = counterclockwise[[i]]))}
-
-      # cross_coord
-      coord[ind, c("x", "y")] <- tf_fun_m(coord_i)
-
-      # xrange yrange
-      xyrange <- tf_fun_m(expand.grid(xrange, yrange))
-      xrange_tf <- range(c(xrange_tf, xyrange[,1]))
-      xrange_tf <- range(c(xrange_tf, xyrange[,2]))
-
-      # header
-      if(!is.null(canvas$cross.header)){
-        canvas$cross.header[i, c("x", "y")] <- tf_fun_m(
-          canvas$cross.header[i, c("x", "y"), drop = F],
-          xx = x[[i]], yy = y[[i]])# range(0, 1)
-      }
+#' Retrieve ranges of X or Y axis
+#'
+#' @param object a CrossLink object
+#' @param layout name of the layout to be retrived or set
+#' @param all also return ranges for each cross. The range does not include header.
+#'
+#' @return range of X or Y axis for the given layout
+#' @export
+#' @name cl_xrange
+#'
+#' @examples
+#'
+cl_xrange <- function(object, layout = NULL, all = F){
+  coord <- object@layout[[nullna_default(layout, cl_active(object))]]
+  coord <- coord[coord$node.type != "header", ,drop = F]
+  if(!all) return(range(coord[["x"]]))
+  else{
+    c(list(canvas = range(coord[["x"]])),
+            sapply(names(object@cross),
+                   function(crs) {
+                     range(coord[coord$cross == crs, "x"])
+                   },
+                   simplify = F, USE.NAMES = T))
     }
-  }else{
-    x0 <- scales::rescale(x[[1]], to = canvas$xrange, from = c(0, 1))
-    y0 <- scales::rescale(y[[1]], to = canvas$yrange, from = c(0, 1))
+}
 
-    ind <- which(coord$cross %in% crosses)
 
-    tf_fun_m <- function(m_xy, xx = x0, yy = y0) {
-      transform_by_matrix(
-        m_xy,
-        matrix = transform_matrix_affine(
-          type = type,
-          x = xx, y = yy, theta = theta[[1]],
-          counterclockwise = counterclockwise[[1]]))}
-    coord[ind, c("x", "y")] <- tf_fun_m(coord[ind, c("x", "y")])
 
-    # range
-    xyrange <- tf_fun_m(expand.grid(xrange, yrange))
-    xrange_tf <- range(xyrange[,1])
-    yrange_tf <- range(xyrange[,2])
+#' @rdname cl_xrange
+#' @export
+cl_yrange <- function(object, layout = NULL, all = F){
+  coord <- object@layout[[nullna_default(layout, cl_active(object))]]
+  coord <- coord[coord$node.type != "header", ,drop = F]
+  if(!all) return(range(coord[["y"]]))
+  else{
+    c(list(canvas = range(coord[["y"]])),
+      sapply(names(object@cross),
+             function(crs) {
+               range(coord[coord$cross == crs, "y"])
+             },
+             simplify = F, USE.NAMES = T))
+  }
+}
 
-    # header
-    if(!is.null(canvas$cross.header)){
-      canvas$cross.header[,c("x", "y")] <- tf_fun_m(
-        canvas$cross.header[, c("x", "y"), drop = F],
-        xx = x[[1]], yy = y[[1]]) # range(0, 1)
-    }
+
+#' Set Headers for each cross
+#'
+#' @inheritParams cl_xrange
+#' @param header a vector of titles for all crosses. Its length should be equal with the length of crosses (\code{object@cross}). Set NULL for default using \code{names(object@cross)} and set NA to remove headers.
+#' @param hjust,vjust a vector for setting x or y position for each header. Repeatedly used if its length less than the length of crosses
+#' @param hjust.by.nodes,vjust.by.nodes hjust and vjust will be setted based on nodes ranges (wo blanks) or cross ranges (w/ blanks). Repeatedly used.
+#'
+#' @return an undated CrossLink object
+#' @export
+#'
+#' @examples
+#'
+set_header <- function(
+  object, header = NULL,
+  hjust = 0.5, vjust = 0.95,
+  hjust.by.nodes = F, vjust.by.nodes = F,
+  layout = NULL){
+
+  layout <- nullna_default(layout, default = cl_active(object))
+  coord <- object@layout[[layout]]
+
+  # remove header first if exists
+  coord <- coord[coord[["node.type"]] != "header",,drop = F]
+
+  cross_names <- names(object@cross)
+
+  if(!identical(header, NA)) {
+    if(is.null(header)) header <- cross_names
+
+    header <- coerce_x_len(header, length(cross_names))
+
+    # cross header
+    header.x <- coerce_x_len(hjust, length(header))
+    header.y <- coerce_x_len(vjust, length(header))
+    hjust.by.nodes <- coerce_x_len(hjust.by.nodes, length(header))
+    vjust.by.nodes <- coerce_x_len(vjust.by.nodes, length(header))
+
+    coord <- rbind(
+      coord,
+      data.frame(
+        node = paste0(cross_names, "_HEADER"),
+        node.type = "header",
+        x = sapply(seq_along(header),
+                   function(i) {
+                     scales::rescale(header.x[i],
+                                     to = range(
+                                       coord[
+                                         coord[['cross']] == cross_names[i] &
+                                         coord[['node.type']] %in%
+                                               (if(hjust.by.nodes[i])
+                                                 c("node")
+                                                else
+                                                  c("node", "top", "bottom")),
+                                             "x"]),
+                                     from = c(0,1))
+                     }),
+        y = sapply(seq_along(header),
+                   function(i) {
+                     scales::rescale(header.y[i],
+                                     to = range(
+                                       coord[
+                                         coord[['cross']] == cross_names[i] &
+                                         coord[['node.type']] %in%
+                                               (if(vjust.by.nodes[i])
+                                                 c("node")
+                                                else
+                                                  c("node", "top", "bottom")),
+                                             "y"]),
+                                     from = c(0,1))
+                   }),
+        cross = cross_names
+      ))
   }
 
   object@layout[[layout]] <- coord
-  canvas$xrange <- xrange_tf
-  canvas$yrange <- yrange_tf
-  object@canvas[[layout]] <- canvas
-  ActiveLayout(object) <- layout
-
-  return(object)
-}
-
-# wrappers
-tf_rotate <- function(
-  object, x = 0.5, y = 0.5, angle = 90, by.each.cross = F, crosses = NULL,
-  layout = "transforming", counterclockwise = FALSE) {
-
-  tf_affine(
-    object, type = c("rotate"), x = x, y = y, angle = angle,
-    counterclockwise = counterclockwise, by.each.cross = by.each.cross,
-    crosses = crosses, layout = layout)
-  }
-
-#
-tf_flip <- function(
-  object, axis = c("x", "y"), by.each.cross = F, crosses = NULL, layout = "transforming") {
-
-  axis <- match.arg(axis)
-  x <- 0
-  y <- 0
-  angle <- switch(axis, x = 0, y = 90)
-  tf_affine(
-    object, type = c("reflect"), x = x, y = y, angle = angle,
-    counterclockwise = T, by.each.cross = by.each.cross,
-    crosses = crosses, layout = layout)
-}
-
-#
-tf_shift <- function(
-  object, x = 0, y = 0, by.each.cross = F, crosses = NULL, # tf these crosses (names)
-  layout = "transforming") {
-
-  tf_affine(
-    object, type = c("translate"), x = x, y = y, theta = NA,
-    counterclockwise = F, by.each.cross = by.each.cross, layout = layout)
-}
-
-# shear
-tf_shear <- function(
-  object, axis = c("x", "y"), angle = 15, # no more than 90
-  by.each.cross = F, crosses = NULL, layout = "transforming", counterclockwise = FALSE) {
-
-  axis <- match.arg(axis)
-  x <- pi*angle/180
-  y <- pi*angle/180
-  if(axis == "x") y <- 0 else x <- 0
-
-  tf_affine(
-    object, type = c("shear"),x = x, y = y, angle = NA,
-    counterclockwise = counterclockwise,by.each.cross = by.each.cross,
-    crosses = crosses,layout = layout)
-}
-
-# scale
-tf_scale <- function(
-  object, x = 1, y = 1, by.each.cross = F, crosses = NULL, layout = "transforming") {
-
-  tf_affine(
-    object, type = c("scale"), x = x, y = y, angle = NA, counterclockwise = F,
-    by.each.cross = by.each.cross, crosses = crosses, layout = layout)
-}
-
-#
-tf_fun <- function(
-  object, fun, along = c("x", "y", "xy"),
-  layout = NULL,
-  xrange.to = NULL, xrange.from = NULL,
-  yrange.to = NULL, yrange.from = NULL) {
-
-  layout <- nullna_default(layout, object@active.layout)
-  x <- object@coord[[layout]][["x"]]
-  y <- object@coord[[layout]][["y"]]
-
-  xy <- transform_by_fun(
-    x = x, y = y, fun = fun, along = along,
-    xrange.to = xrange.to, xrange.from = xrange.from,
-    yrange.to = yrange.to, yrange.from = yrange.from)
-  object@coord[[layout]][["x"]] <- xy[["x"]]
-  object@coord[[layout]][["y"]] <- xy[["y"]]
-
-  XRange(object, layout = layout) <- range(xy[['x']], XRange(object, layout = layout))
-  YRange(object, layout = layout) <- range(xy[['y']], YRange(object, layout = layout))
+  object@params$header <- header
 
   return(object)
 }
 
 
-# new_scale
-# https://eliocamp.github.io/codigo-r/2018/09/multiple-color-and-fill-scales-with-ggplot2/
-
-getCrossData <- function(object, layout = NULL){
-  layout <- nullna_default(layout, ActiveLayout(object))
+#' Get cross data for plotting
+#'
+#' Retrieve 2D coordinates of crosses
+#'
+#' @inheritParams cl_xrange
+#'
+#' @return data.frame
+#' @export
+#'
+#' @examples
+#'
+get_cross <- function(object, layout = NULL){
+  layout <- nullna_default(layout, cl_active(object))
   cross_coord <- object@layout[[layout]]
+  cross_coord <- cross_coord[cross_coord[["node.type"]] == "node",,drop = F]
   cross_data <- as.data.frame(
     cbind(cross_coord,
           object@nodes[match(cross_coord$node,
-                             object@nodes[[object@params$node.key.by]]),
+                             object@nodes[[object@params$key.by]]),
                        , drop = F]))
   return(cross_data)
 }
 
-getLinkData <- function(object, layout = NULL, geom = c("segment", "curve", "arc", "bezier")){
-  layout <- nullna_default(layout, ActiveLayout(object))
+#' Get link data for plotting
+#'
+#' Retrieve 2D coordinates of links
+#'
+#' @inheritParams get_cross
+#'
+#' @return data.frame
+#' @export
+#'
+#' @examples
+#'
+get_link <- function(object, layout = NULL){
+  layout <- nullna_default(layout, cl_active(object))
   cross_coord <- object@layout[[layout]]
+  cross_coord <- cross_coord[cross_coord[["node.type"]] == "node",,drop = F]
+
   link_data <- object@edges
-  link_data$source <- link_data[[object@params$edge.source.by]]
-  link_data$target <- link_data[[object@params$edge.target.by]]
+  link_data$source <- link_data[[object@params$src.by]]
+  link_data$target <- link_data[[object@params$tar.by]]
   link_data[c("x", "y")] <- cross_coord[match(link_data$source, cross_coord$node), c("x", "y")]
   link_data[c("xend", "yend")]<- cross_coord[match(link_data$target, cross_coord$node), c("x", "y")]
   return(link_data)
 }
 
-getHeaderData <- function(object, layout = NULL, relative = F, y.by.each.cross = F){
-  layout <- nullna_default(layout, ActiveLayout(object))
+#' Get header data for plotting
+#'
+#' Retrieve 2D coordinates of headers
+#'
+#' @inheritParams get_cross
+#'
+#' @return data.frame
+#' @export
+#'
+#' @examples
+#'
+get_header <- function(object, layout = NULL){
+  layout <- nullna_default(layout, cl_active(object))
   cross_coord <- object@layout[[layout]]
-  header_pos <- object@canvas[[layout]]$cross.header
 
-  if(is.null(header_pos)) {
-    warning("Header not found!")
-    return(header_pos)
+  if(!("header" %in% cross_coord[['node.type']])) {
+    warning("Header data not found! You might use set_header to add headers")
+    header <- NA
   }else{
-    if(relative)
-      return(header_pos)
-    else{
-      header_coord <- header_pos
-      for(i in 1:nrow(header_pos)){
-        ind <- cross_coord$cross == header_pos[i, "cross"]
-        header_coord[i, "x"] <- scales::rescale(header_pos[i, "x"],
-                                                range(cross_coord[ind, "x"]),
-                                                c(0,1))
+    header_coord <- cross_coord[cross_coord[["node.type"]] == "header",,drop = F]
+    header <- cbind(
+      header_coord,
+      header = object@params$header[match(header_coord$cross, names(object@cross))]
+    )
+  }
 
-        if(y.by.each.cross){
-          yrange <- range(cross_coord[ind, "y"])
-          yrange[2] <- yrange[2] + 0.05 * diff(yrange)
-        }else{
-          yrange <- YRange(object)
+  return(header)
+}
+
+
+#' Plot a CrossLink object
+#'
+#' @param object a CrossLink object
+#' @param layout the layout to be plot. Set NULL to plot current active layout
+#' @param link a named list of arguments for links. see [ggplot2::geom_segment()]. Set NULL to use default settings, or Set NA to not show.
+#' @param cross a named list of arguments for crosses. see [ggplot2::geom_point()]. Set NULL to use default settings, or Set NA to not show.
+#' @param label a named list of arguments for node labels. see [ggplot2::geom_text()]. Set NULL to use default settings, or Set NA to not show.
+#' @param header a named list of arguments for headers. see [ggplot2::geom_text()]. Set NULL to use default settings, or Set NA to not show.
+#' @param ... other arguments passed to ???
+#'
+#' @return a ggplot2 object
+#' @details
+#' For link, cross, label, header: "geom" is restricted for setting geom function, such as list(geom = "arc") for link.
+#'
+#' @import ggplot2
+#' @md
+#' @export
+#'
+#' @examples
+#'
+cl_plot <- function(object, layout = NULL,
+                    link = NULL,
+                    cross = NULL,
+                    label = NULL,
+                    header = NULL,
+                    ...){
+  p_layer <- function(p, list, data_fun, default_aes, default_geom = NULL){
+    if(!identical(list, NA)){
+      list$mapping <- override_aes(list$mapping, default_aes)
+      list$data <- nullna_default(list$data, data_fun(object, layout))
+      geom <- paste0("geom_",nullna_default(list$geom, default_geom))
+      list$geom <- NULL
+      scale <- list$scale
+      list$scale <- NULL
+      p <- p + do.call(geom, list)
+      if(!is.null(scale)) {
+        scale_aes = unique(names(scale))
+        for(i in seq_along(scale_aes)){
+          p <- p+ eval(parse(text = scale[[scale_aes[i]]])) + ggnewscale::new_scale(scale_aes[i])
         }
-        header_coord[i, "y"] <- scales::rescale(header_pos[i, "y"],
-                                                yrange,
-                                                c(0,1))
       }
-      return(header_coord)
+
+      return(p)
+    }else{
+      return(p)
     }
   }
 
-}
-
-setHeader <- function(object, cross.header = NULL, cross.header.pos = c(0.5, 1), layout = NULL){
-  layout <- nullna_default(layout, default = ActiveLayout(object))
-
-  cross_names <- names(object@cross)
-  # cross.header
-  if(!is.null(cross.header)){
-    cross.header.pos <- coerce_x_len(cross.header.pos, 2*length(cross))
-    cross.header <- nullna_default(cross.header, cross_names)
-    cross.header <- data.frame(
-      cross = cross_names,
-      header = cross.header,
-      x = cross.header.pos[2*(seq_len(length(cross_names))) -1],
-      y = cross.header.pos[2*(seq_len(length(cross_names)))])
-    object@canvas[[layout]]$cross.header <- cross.header
-  }else{
-    object@canvas[[layout]]["cross.header"] <- cross.header # ["name"] <- allow NULL to be assigned
-  }
-
-  return(object)
-}
-# helper function
-showAes <- function(object){
-  cat("Available meta.data names are showing below.\n")
-  cat("Cross:", paste(colnames(getCrossData(object)), collapse = ", "), "\n")
-  cat("Link:", paste(colnames(getLinkData(object)), collapse = ", "), "\n")
-  cat("Header:", paste(colnames(suppressWarnings(getHeaderData(object))), collapse = ", "), "\n")
-}
-
-
-load("data/columns.rda")
-load("data/nodes.rda")
-load("data/edges.rda")
-
-library(tidyverse)
-library(magrittr)
-
-pl_crosslink <- function(
-  object,
-  args.cross = NULL,
-  args.link = NULL,
-  args.header = NULL,
-  args.label = NULL){
-
   p <- ggplot()
-  if(!is.null(args.link)) p <- p + do.call(geom_segment, c(args.link, list(data = getLinkData(object))))
-  if(!is.null(args.cross)) p <- p +   do.call(geom_point, c(args.cross, list(data = getCrossData(object))))
-  if(!is.null(args.header)) {
-    header <- getHeaderData(object)
-    if(is.null(header)) warning("Header data is not found!")
-    else p <- p +  do.call(geom_text, c(args.header, list(data = header)))
+  # link
+  p <- p_layer(p,
+               link, data_fun = get_link,
+               default_aes = aes(x = x, y = y, xend = xend, yend = yend),
+               default_geom = "segment")
+  # cross
+  p <- p_layer(p,
+               cross, data_fun = get_cross,
+               default_aes = aes(x = x, y = y),
+               default_geom = "point")
+  # label
+  p <- p_layer(p,
+               label, data_fun = get_cross,
+               default_aes = aes_string(x = "x", y = "y", label = object@params$key.by),
+               default_geom = "text")
+  # header
+  if(!identical(suppressWarnings(get_header(object, layout)), NA)){
+    p <- p_layer(p,
+                 header, data_fun = get_header,
+                 default_aes = aes(x = x, y = y, label = header),
+                 default_geom = "text")
   }
-  if(!is.null(args.label)) p <- p +  do.call(geom_text, c(args.label, list(data = getCrossData(object))))
 
-  p <-  p +
-    xlim(XRange(object)) + ylim(YRange(object)) +
-    theme_void()
+  #p <- p + xlim(cl_xrange(object)) + ylim(cl_yrange(object))
 
   return(p)
 }
 
-pl_crosslink(
-  cl,
-  args.cross = list(mapping = aes(x, y, color = color, size = size)),
-  args.link = list(mapping = aes(x, y, xend = xend, yend = yend),
-                   color = "grey90"),
-  args.header = list(mapping = aes(x,y , label = header)),
-  args.label = list(mapping = aes(x,y, label = node))
-  )
 
-cl <- CrossLink(
-  nodes %>% mutate(type = factor(type, unique(type))),
-  edges, cross.by = "type", cross.header = NULL, cross.header.pos = c(0, 0.5),
-  xrange = c(0, 7), yrange = c(0, 11))
 
-cl %<>% tf_rotate()
-cl %<>% setHeader()
-tmp1 <- getLinkData(cl)
-tmp2 <- getLinkData(cl)
-tmp2$x <- tmp2$xend
-tmp2$y <- tmp2$yend
-tmp <- rbind(tmp1, tmp2)
-tmp$group <- rep(1:nrow(tmp1), 2)
-ggplot() +
-  # geom_diagonal0(mapping = aes(x, y, xend = xend, yend = yend),
-  #                color = "grey",
-  #                data = getLinkData(cl)) +
-  geom_diagonal2(mapping = aes(x, y,group = group, color = as.character(y)),
-                 data = tmp) +
-  ggnewscale::new_scale_color() +
-  geom_point(mapping = aes(x, y, color = color, size = size),
-             data = getCrossData(cl)) +
-  scale_color_manual(values = unique(cl@nodes$color)) +
-  # geom_text(mapping = aes(x,y , label = header),
-  #           data = getHeaderData(cl, y.by.each.cross = T)) +
-  xlim(XRange(cl)) + ylim(YRange(cl))# +  theme_void()
+#' copy layout and canvas
+#'
+#' @param object a CrossLink object
+#' @param to layout name to save into
+#' @param from layout name to copy from, set NULL to use active layout.
+#' @param override override the existed layout
+#'
+#' @return an updated CrossLink object
+#' @export
+#'
+#' @examples
+#'
+cl_copy <- function(object, to, from = NULL, override = F) {
+  cl_layouts <- cl_layouts(object)
+  from <- nullna_default(from, default = cl_active(object))
+
+  if(!from %in% cl_layouts) {
+    warning(from, " is not in layouts, nothing to be done!")
+    return(object)
+  }
+  if(to %in% cl_layouts){
+    if(override) warning(to, " is already in layouts, which will be overided!")
+    else stop(to, " is already in layouts, set overided = TRUE if you want to override it!")
+  }
+  message("Copy layout ", from," into ", to, ", and Set active layout to ", to)
+  object@layout[[to]] <- object@layout[[from]]
+  # object@canvas[[to]] <- object@canvas[[from]]
+  cl_active(object) <- to
+
+  return(object)
+}
+
+#' Retrieve coordinates of nodes
+#'
+#' @param object a CrossLink object
+#' @param nodes keys of nodes to be retrieved
+#' @param relative return relative values in the canvas or each cross (rel.by.cross = TRUE). values are in range of 0 to 1.
+#' @param rel.by.cross return relative values to each cross.
+#'
+#' @return a vector of values
+#' @export
+#'
+#' @examples
+#'
+cl_coord <- function(object, nodes, relative = F, rel.by.cross = F, layout = NULL){
+  layout <- nullna_default(layout, cl_active(object))
+  cl_active(object) <- layout
+
+  coord <- object@layout[[layout]]
+
+  node_coord <- coord[coord$node %in% nodes,,drop = F]
+  xrange <- cl_xrange(object, layout, all = T)
+  yrange <- cl_yrange(object, layout, all = T)
+  if(relative){
+    rel.by.cross <- if (rel.by.cross) "canvas" else as.character(node_coord$cross)
+    node_coord$x <- do.call(c, mapply(
+      scales::rescale, x = as.list(node_coord$x), to = list(c(0,1)), from = xrange[rel.by.cross],
+      SIMPLIFY = F
+    ))
+    node_coord$y <- do.call(c, mapply(
+      scales::rescale, x = as.list(node_coord$x), to = list(c(0,1)), from = yrange[rel.by.cross],
+      SIMPLIFY = F
+    ))
+  }
+  return(node_coord)
+}
+
+#' Convert relative coordinates
+#'
+#' @param object a CrossLink object
+#' @param x,y relative coordinates
+#' @param crosses relative about which cross
+#' @param by.canvas relative about whole canvas
+#' @param layout layout name to retrieve coordinates
+#'
+#' @return data.frame
+#' @export
+#'
+#' @examples
+#'
+cl_rel2abs <- function(object, x = 0, y = 0, crosses = NULL, by.canvas = F, layout = NULL){
+  layout <- nullna_default(layout, cl_active(object))
+  crosses <- nullna_default(crosses, names(object@cross))
+  x <- coerce_x_len(x, length(crosses))
+  y <- coerce_x_len(y, length(crosses))
+
+  coord <- object@layout[[layout]]
+  xrange <- cl_xrange(object, layout, all = T)
+  yrange <- cl_yrange(object, layout, all = T)
+
+  rel.by <- if (by.canvas) "canvas" else crosses
+
+  x <- do.call(c, mapply(
+    scales::rescale, x = as.list(x), from = list(c(0,1)), to = xrange[rel.by],
+    SIMPLIFY = F
+  ))
+  y <- do.call(c, mapply(
+    scales::rescale, x = as.list(y), from = list(c(0,1)), to = yrange[rel.by],
+    SIMPLIFY = F
+  ))
+
+  data.frame(x = x, y = y)
+}
+# new_scale
+# https://eliocamp.github.io/codigo-r/2018/09/multiple-color-and-fill-scales-with-ggplot2/
+
+
+
+
+#' show available aes
+#'
+#' @param object a CrossLink object
+#'
+#' @return NULL
+#' @export
+#'
+#' @examples
+#'
+show_aes <- function(object){
+  cat("Available meta.data names are showing below.\n")
+  cat("Cross:", paste(colnames(get_cross(object)), collapse = ", "), "\n")
+  cat("Link:", paste(colnames(get_link(object)), collapse = ", "), "\n")
+  cat("Header:", paste(colnames(suppressMessages(get_header(object))), collapse = ", "), "\n")
+}
+
+
+
+
+
+#
+# pl_crosslink(
+#   cl,
+#   cross = list(mapping = aes(x, y, color = color, size = size)),
+#   link = list(mapping = aes(x, y, xend = xend, yend = yend),
+#                    color = "grey90"),
+#   header = list(mapping = aes(x,y , label = header)),
+#   label = list(mapping = aes(x,y, label = node))
+#   )
+#
+# cl <- CrossLink(
+#   nodes %>% mutate(type = factor(type, unique(type))),
+#   edges, cross.by = "type", cross.header = NULL, cross.header.pos = c(0, 0.5),
+#   xrange = c(0, 7), yrange = c(0, 11))
+#
+# cl %<>% tf_rotate()
+# cl %<>% set_header()
+# tmp1 <- get_link(cl)
+# tmp2 <- get_link(cl)
+# tmp2$x <- tmp2$xend
+# tmp2$y <- tmp2$yend
+# tmp <- rbind(tmp1, tmp2)
+# tmp$group <- rep(1:nrow(tmp1), 2)
+# ggplot() +
+#   # geom_diagonal0(mapping = aes(x, y, xend = xend, yend = yend),
+#   #                color = "grey",
+#   #                data = get_link(cl)) +
+#   geom_diagonal2(mapping = aes(x, y,group = group, color = as.character(y)),
+#                  data = tmp) +
+#   ggnewscale::new_scale_color() +
+#   geom_point(mapping = aes(x, y, color = color, size = size),
+#              data = get_cross(cl)) +
+#   scale_color_manual(values = unique(cl@nodes$color)) +
+#   # geom_text(mapping = aes(x,y , label = header),
+#   #           data = get_header(cl, y.by.each.cross = T)) +
+#   xlim(cl_xrange(cl)) + ylim(cl_yrange(cl))# +  theme_void()
 
 
 # Set Header should be the last
