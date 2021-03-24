@@ -39,6 +39,6 @@ params: other params used for internal functions
 
 \item{\code{active}}{character, Name of the active, or default, layout; settable using \code{\link{cl_active}}}
 
-\item{\code{params}}{list.}
+\item{\code{params}}{list}
 }}
 

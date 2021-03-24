@@ -7,35 +7,52 @@
 \alias{layout_hive}
 \alias{layout_polygon}
 \alias{layout_arc}
-\alias{layout_custom}
 \title{Predefined layouts}
 \usage{
-layout_column(object, layout_save = "column")
+layout_column(
+  object,
+  layout_based = "default",
+  layout_save = NULL,
+  crosses = NULL
+)
 
-layout_row(object, layout_save = "row")
+layout_row(
+  object,
+  layout_based = "default",
+  layout_save = NULL,
+  crosses = NULL
+)
 
 layout_hive(
   object,
   angles = NULL,
-  layout_based = "initial",
-  layout_save = "hive"
+  crosses = NULL,
+  layout_based = "default",
+  layout_save = NULL
 )
 
 layout_polygon(
   object,
   angles = NULL,
-  layout_based = "initial",
-  layout_save = "polygon"
+  crosses = NULL,
+  layout_based = "default",
+  layout_save = NULL
 )
 
-layout_arc(object, angles = 30, layout_based = "initial", layout_save = "arc")
-
-layout_custom(object, angles = 30, layout_save = "arc")
+layout_arc(
+  object,
+  angles = 30,
+  crosses = NULL,
+  layout_based = "default",
+  layout_save = NULL
+)
 }
 \arguments{
 \item{object}{a CrossLink object}
 
-\item{layout_save}{layout name to save}
+\item{layout_based}{layout name to base on. Default: "default". This parameter is reserved for testing, and it is not recommended to change it!}
+
+\item{layout_save}{layout name to save. set NA or NULL for active layout.}
 
 \item{angles}{angles in degree for hive, polygon and arc. set NA or NULL for equally divided.}
 }
@@ -46,9 +63,9 @@ a updated CrossLink object
 Predefined layouts
 }
 \details{
-\code{layout_column} is the default \code{initial} layout.
+\code{layout_column} is the default \code{default} layout.
 
-\code{layout_row} and \code{layout_column} will always based on \code{initial} layout.
+\code{layout_row} and \code{layout_column} will always based on \code{default} layout.
 }
 \examples{
 

@@ -8,10 +8,10 @@ crosslink(
   nodes,
   edges,
   cross.by,
-  gaps = NA,
-  spaces = NA,
-  xrange = c(0, 10),
-  yrange = c(0, 10),
+  gaps = NULL,
+  spaces = c("equal", "partition", "flank"),
+  xrange = NULL,
+  yrange = NULL,
   key.by = 1,
   src.by = 1,
   tar.by = 2,
@@ -23,18 +23,19 @@ crosslink(
 
 \item{edges}{a data frame with source and target nodes in the first two (settable by \code{src.by} and \code{tar.by}) columns and other metadata.}
 
-\item{cross.by}{name of the column in \code{nodes} to be used to group nodes in different crosses. The order of crosses and nodes could be controlled by setting levels for corresponding columns in \code{nodes} using \code{\link{factor}} or \code{\link{forcats::fct_relevel}}}
+\item{cross.by}{the name of a column in \code{nodes}, by which nodes will be grouped into different crosses.
+To control the order of crosses and the order of nodes, set factor levels for the corresponding column in \code{nodes}. see \code{\link{factor}} or \code{\link{forcats::fct_relevel}}}
 
-\item{gaps}{a numeric vector of n-1 length, n is equal to length of crosses (that is \code{length(object@crosses)}).
-The gaps vector is c(gaps between adjacent crosses).
-set NA to use equally divided gaps.}
+\item{gaps}{a numeric vector of n-1 length, n is the number of crosses (that is \code{length(object@crosses)}).
+It's a vector of gaps between adjacent crosses.
+set NA or NULL to use equally divided gaps.}
 
-\item{spaces}{a named list of numeric vectors. The names must be names of crosses to be changed.
-And each vector is of n+1 length, n is equal to length of nodes in their belonging cross.
-The vector is c(top flank, spaces between adjacent nodes, bottom flank).
-set NA to use equally divided spaces.}
+\item{spaces}{set \code{"equal"} for equidistant globally in all crosses,
+set \code{"partition"} for equidistant separately in each cross,
+or set \code{"flank"}, which is similar to \code{"partition"} but with top/bottom flank anchors included.
+Default: \code{equal}.}
 
-\item{xrange, yrange}{canvas range}
+\item{xrange, yrange}{range of x and y. set NULL or NA to ignore this.}
 
 \item{key.by}{name or index of the column in \code{nodes} to be used as key of nodes}
 

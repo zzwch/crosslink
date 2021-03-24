@@ -2,9 +2,9 @@
 % Please edit documentation in R/crosslink.R
 \name{cl_copy}
 \alias{cl_copy}
-\title{copy layout and canvas}
+\title{copy layout}
 \usage{
-cl_copy(object, to, from = NULL, override = F)
+cl_copy(object, to, from = NULL, crosses = NULL, override = F)
 }
 \arguments{
 \item{object}{a CrossLink object}
@@ -13,13 +13,15 @@ cl_copy(object, to, from = NULL, override = F)
 
 \item{from}{layout name to copy from, set NULL to use active layout.}
 
+\item{crosses}{a vector of cross names, and only these crosses will be copied or overrided. set NULL or NA for all crosses.}
+
 \item{override}{override the existed layout}
 }
 \value{
 an updated CrossLink object
 }
 \description{
-copy layout and canvas
+copy layout
 }
 \examples{
 

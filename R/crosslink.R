@@ -12,7 +12,7 @@
 #' @slot cross a list, saving nodes in each cross, initialized by \code{\link{crosslink}}
 #' @slot layout a list, saving different layout of coordinates of nodes in crosses.
 #' @slot active character, Name of the active, or default, layout; settable using \code{\link{cl_active}}
-#' @slot params list.
+#' @slot params list
 #'
 #' @details
 #' cross: list names are inherited from cross.by in nodes; names' order (to control it using factor) is used as column order.
@@ -44,15 +44,16 @@ CrossLink <- setClass(
 #'
 #' @param nodes a data frame with unique keys in the 1st (settable by \code{key.by}) column and metadata (used for aesthetic of nodes) in the other columns
 #' @param edges a data frame with source and target nodes in the first two (settable by \code{src.by} and \code{tar.by}) columns and other metadata.
-#' @param cross.by name of the column in \code{nodes} to be used to group nodes in different crosses. The order of crosses and nodes could be controlled by setting levels for corresponding columns in \code{nodes} using \code{\link{factor}} or \code{\link{forcats::fct_relevel}}
-#' @param gaps a numeric vector of n-1 length, n is equal to length of crosses (that is \code{length(object@crosses)}).
-#'  The gaps vector is c(gaps between adjacent crosses).
-#'  set NA to use equally divided gaps.
-#' @param spaces a named list of numeric vectors. The names must be names of crosses to be changed.
-#' And each vector is of n+1 length, n is equal to length of nodes in their belonging cross.
-#' The vector is c(top flank, spaces between adjacent nodes, bottom flank).
-#' set NA to use equally divided spaces.
-#' @param xrange,yrange canvas range
+#' @param cross.by the name of a column in \code{nodes}, by which nodes will be grouped into different crosses.
+#' To control the order of crosses and the order of nodes, set factor levels for the corresponding column in \code{nodes}. see \code{\link{factor}} or \code{\link{forcats::fct_relevel}}
+#' @param gaps a numeric vector of n-1 length, n is the number of crosses (that is \code{length(object@crosses)}).
+#'  It's a vector of gaps between adjacent crosses.
+#'  set NA or NULL to use equally divided gaps.
+#' @param spaces set \code{"equal"} for equidistant globally in all crosses,
+#' set \code{"partition"} for equidistant separately in each cross,
+#' or set \code{"flank"}, which is similar to \code{"partition"} but with top/bottom flank anchors included.
+#' Default: \code{equal}.
+#' @param xrange,yrange range of x and y. set NULL or NA to ignore this.
 #' @param key.by name or index of the column in \code{nodes} to be used as key of nodes
 #' @param src.by name or index of the column in \code{edges} to be used as source of links (edges)
 #' @param tar.by name or index of the column in \code{edges} to be used as target of links (edges)
@@ -64,7 +65,8 @@ CrossLink <- setClass(
 #' @examples
 #'
 crosslink <- function(
-  nodes, edges, cross.by, gaps = NA, spaces = NA, xrange = c(0, 10), yrange = c(0, 10),
+  nodes, edges, cross.by, gaps = NULL, spaces = c( "equal", "partition", "flank"),
+  xrange = NULL, yrange = NULL,
   key.by = 1, src.by = 1, tar.by = 2,
   odd.rm = FALSE) {
   # I try to keep one function clean and simple, which should be friendly.
@@ -87,31 +89,65 @@ crosslink <- function(
   if(odd.rm) nodes <- nodes[(nodes[[key.by]] %in% edges[[src.by]]) | (nodes[[key.by]] %in% edges[[tar.by]]),]
   # c(fct_x, fct_y) will coerce fct_x, and fct_y to numeric
 
+
   node_key <- nodes[[key.by]]
   node_crs <- nodes[[cross.by]]
 
   # check nodes uniqueness
   if(anyDuplicated(node_key) != 0) stop("keys of nodes must be unique!")
 
+  # node degree
+  nodes$degree <- 0
+  tab_degree <- table(c(as.character(edges[[src.by]]), as.character(edges[[tar.by]])))
+  nodes[match(names(tab_degree), node_key), "degree"] <- tab_degree
+
+  # edge source/target
+  edges$src.cross <- node_crs[match(edges[[src.by]], node_key)]
+  edges$tar.cross <- node_crs[match(edges[[tar.by]], node_key)]
+
   # cross
   cross <- tolist_by_group(factor(node_key), node_crs, drop = T) # factor(x) will drop unused levels
 
   # range
-  # xrange <- c(0, length(cross)+1)
-  # yrange <- c(0, do.call(max, lapply(cross, length))+1)
+  xrange <- nullna_default(xrange, c(1, length(cross)))
+  yrange <- nullna_default(yrange, c(0, do.call(max, lapply(cross, length))+1))
+  # xrange = c(0, 10), yrange = c(0, 10),
+
 
   # levels from up to down
   cross_anchored <- sapply(names(cross), function(x){
-    x_nodes <- c(paste0(x, "_BOTTOM"),
-                 rev(levels(factor(cross[[x]]))),
-                 paste0(x, "_TOP"))
-    factor(x = x_nodes,
-           levels = x_nodes)
-    }, simplify = F, USE.NAMES = T)
+    x_nodes <- c(paste0(x, "_BOTTOM"), rev(levels(factor(cross[[x]]))), paste0(x, "_TOP"))
+    factor(x = x_nodes, levels = x_nodes)
+  },simplify = F, USE.NAMES = T)
+
+  # spaces
+  spaces <- match.arg(spaces)
+  space_equal <- 1/(do.call(max, lapply(cross_anchored, length)) - 1)
+  spaces <- switch(spaces,
+                   equal = sapply(cross,
+                                  function(i) {
+                                    i_n <- length(i) - 1
+                                    ispace <- space_equal
+                                    iflank <- (1 - ispace * i_n)/2
+                                    c(iflank, rep(ispace, i_n), iflank)
+                                    }, simplify = F, USE.NAMES = T),
+                   partition = sapply(cross,
+                                      function(i) {
+                                        i_n <- length(i) - 1
+                                        iflank <- space_equal
+                                        ispace <- (1 - iflank * 2)/i_n
+                                        c(iflank, rep(ispace, i_n), iflank)
+                                        }, simplify = F, USE.NAMES = T),
+                   flank = sapply(cross,
+                                  function(i) {
+                                    i_n <- length(i) + 1
+                                    rep(1/i_n, i_n)
+                                  }, simplify = F, USE.NAMES = T)
+                   )
 
   # layout
   layout <- list(
-    initial = data.frame(
+    default = data.frame(
         node = unlist(cross_anchored),
         node.type = unlist(lapply(cross_anchored, function(x) {c("bottom", rep("node", length(x)-2), "top")})),
         x = vector_to_coord(x = factor(rep(names(cross_anchored),
@@ -133,7 +169,12 @@ crosslink <- function(
     key.by = key.by,
     src.by = src.by,
     tar.by = tar.by,
-    cross.by = cross.by
+    cross.by = cross.by,
+    xscales = gaps,
+    yscales = spaces,
+    yspace = space_equal,
+    xrange = xrange,
+    yrange = yrange
   )
 
   return(
@@ -142,12 +183,64 @@ crosslink <- function(
         edges = edges,
         cross = cross,
         layout = layout,
-        active = "initial",
+        active = "default",
         params = params)
     )
 }
 
 
+#' change spaces in default layout
+#'
+#' @param object a CrossLink object
+#' @param spaces A named list of numeric vectors or characters of "equal", "partition" and "flank" (see \code{\link{crosslink}}).
+#' For each numeric vector, its length must be n+1, and n is the number of nodes in the corresponding cross;
+#' The vector is c(top flank, spaces between adjacent nodes, bottom flank);
+#' "equal", "partition" and "flank" will be converted to numeric vectors internally.
+#' Only crosses whose names are among the list's names will be changed.
+#' @details
+#' This function will only change default layout.
+#' So, it is recommended to use this function after \code{\link{crosslink}},
+#' and before transformation.
+#' @return an updated CrossLink object
+#' @export
+#'
+#' @examples
+#'
+set_space <- function(object, spaces){
+  if(!is.list(spaces)) stop("spaces setting must be a list!")
+  yscales <- object@params$yscales
+  yspace <- object@params$yspace
+  default <- object@layout$default
+
+  for(i in names(spaces)) {
+    if(i %in% names(yscales)){
+      i_sc <- yscales[[i]]
+      i_sp <- spaces[[i]]
+      if(!is.numeric(i_sp)){
+        if(is.character(i_sp) && length(i_sp) == 1){
+          i_n <- length(i_sc) - 1 - 1
+          i_sp <- switch(i_sp,
+                         equal = c((1-yspace*i_n)/2, rep(yspace, i_n), (1-yspace*i_n)/2),
+                         partition = c(yspace, rep((1-2*yspace)/i_n, i_n), yspace),
+                         flank = rep(1/length(i_sc), length(i_sc))
+          )
+        }else{
+          stop("Invalid space setting for ", i)
+        }
+      }else{
+        if(length(i_sp) != length(i_sc)) stop("Length is not right for ", i)
+      }
+      i_sc <- i_sp/sum(i_sp)
+
+      # layout
+      i_ind <- default$cross == i & default$node.type != "header"
+      default[i_ind, "y"] <- vector_to_coord(factor(default[i_ind, "node"]), i_sc, range(default[i_ind, "y"]))
+    }
+  }
+
+  object@layout$default <- default
+  return(object)
+}
 
 
 #' Print the CrossLink object
@@ -230,6 +323,7 @@ cl_active <- function(object, ret.data = F) {
 #' @param object a CrossLink object
 #' @param layout name of the layout to be retrived or set
 #' @param all also return ranges for each cross. The range does not include header.
+#' @param crosses subset crosses. NULL for all crosses.
 #'
 #' @return range of X or Y axis for the given layout
 #' @export
@@ -237,13 +331,19 @@ cl_active <- function(object, ret.data = F) {
 #'
 #' @examples
 #'
-cl_xrange <- function(object, layout = NULL, all = F){
+cl_xrange <- function(object, layout = NULL, all = F, crosses = NULL, include.flank = T){
   coord <- object@layout[[nullna_default(layout, cl_active(object))]]
   coord <- coord[coord$node.type != "header", ,drop = F]
-  if(!all) return(range(coord[["x"]]))
+  if(!include.flank){
+    coord <- coord[coord$node.type == "node", ,drop = F]
+  }
+
+  crosses <- nullna_default(crosses, names(object@cross))
+
+  if(!all) return(range(coord[coord$cross %in% crosses, "x"]))
   else{
     c(list(canvas = range(coord[["x"]])),
-            sapply(names(object@cross),
+            sapply(crosses,
                    function(crs) {
                      range(coord[coord$cross == crs, "x"])
                    },
@@ -255,13 +355,18 @@ cl_xrange <- function(object, layout = NULL, all = F){
 
 #' @rdname cl_xrange
 #' @export
-cl_yrange <- function(object, layout = NULL, all = F){
+cl_yrange <- function(object, layout = NULL, all = F, crosses = NULL, include.flank = T){
   coord <- object@layout[[nullna_default(layout, cl_active(object))]]
   coord <- coord[coord$node.type != "header", ,drop = F]
-  if(!all) return(range(coord[["y"]]))
+  if(!include.flank){
+    coord <- coord[coord$node.type == "node", ,drop = F]
+  }
+  crosses <- nullna_default(crosses, names(object@cross))
+
+  if(!all) return(range(coord[coord$cross %in% crosses, "y"]))
   else{
     c(list(canvas = range(coord[["y"]])),
-      sapply(names(object@cross),
+      sapply(crosses,
              function(crs) {
                range(coord[coord$cross == crs, "y"])
              },
@@ -436,7 +541,7 @@ get_header <- function(object, layout = NULL){
 #' @param cross a named list of arguments for crosses. see [ggplot2::geom_point()]. Set NULL to use default settings, or Set NA to not show.
 #' @param label a named list of arguments for node labels. see [ggplot2::geom_text()]. Set NULL to use default settings, or Set NA to not show.
 #' @param header a named list of arguments for headers. see [ggplot2::geom_text()]. Set NULL to use default settings, or Set NA to not show.
-#' @param ... other arguments passed to ???
+#' @param add other gg object to be added to final plot, such as theme().
 #'
 #' @return a ggplot2 object
 #' @details
@@ -453,12 +558,17 @@ cl_plot <- function(object, layout = NULL,
                     cross = NULL,
                     label = NULL,
                     header = NULL,
-                    ...){
-  p_layer <- function(p, list, data_fun, default_aes, default_geom = NULL){
+                    add = NULL,
+                    annotation = cl_annotation()){
+  p_layer <- function(p, list, data_fun, default_aes, default_geom, default_param = NULL){
     if(!identical(list, NA)){
       list$mapping <- override_aes(list$mapping, default_aes)
       list$data <- nullna_default(list$data, data_fun(object, layout))
-      geom <- paste0("geom_",nullna_default(list$geom, default_geom))
+      params <- setdiff(names(default_param), names(list))
+      for (i in params) {
+        list[[i]] <- default_param[[i]]
+      }
+      geom <- paste0("geom_", nullna_default(list$geom, default_geom))
       list$geom <- NULL
       scale <- list$scale
       list$scale <- NULL
@@ -466,7 +576,8 @@ cl_plot <- function(object, layout = NULL,
       if(!is.null(scale)) {
         scale_aes = unique(names(scale))
         for(i in seq_along(scale_aes)){
-          p <- p+ eval(parse(text = scale[[scale_aes[i]]])) + ggnewscale::new_scale(scale_aes[i])
+          #p <- p+ eval(parse(text = scale[[scale_aes[i]]])) + ggnewscale::new_scale(scale_aes[i])
+          p <- ggplot_add(scale[[scale_aes[i]]], p) + ggnewscale::new_scale(scale_aes[i])
         }
       }
 
@@ -480,38 +591,106 @@ cl_plot <- function(object, layout = NULL,
   # link
   p <- p_layer(p,
                link, data_fun = get_link,
-               default_aes = aes(x = x, y = y, xend = xend, yend = yend),
+               default_aes = aes(x = x, y = y, xend = xend, yend = yend, color = src.cross),
                default_geom = "segment")
   # cross
   p <- p_layer(p,
                cross, data_fun = get_cross,
-               default_aes = aes(x = x, y = y),
+               default_aes = aes(x = x, y = y, size = degree),
                default_geom = "point")
   # label
   p <- p_layer(p,
                label, data_fun = get_cross,
-               default_aes = aes_string(x = "x", y = "y", label = object@params$key.by),
+               default_aes = aes_string(x = "x", y = "y", label = object@params$key.by, color = "cross"),
                default_geom = "text")
   # header
   if(!identical(suppressWarnings(get_header(object, layout)), NA)){
     p <- p_layer(p,
                  header, data_fun = get_header,
-                 default_aes = aes(x = x, y = y, label = header),
-                 default_geom = "text")
+                 default_aes = aes(x = x, y = y, label = header, color = cross),
+                 default_geom = "text", default_param = list(fontface = "bold"))
   }
 
-  #p <- p + xlim(cl_xrange(object)) + ylim(cl_yrange(object))
+  # expand
+  p <- p +
+    scale_x_continuous(expand = expansion(mult = 0.1)) +
+    scale_y_continuous(expand = expansion(mult = 0.1))
+
+  # add
+  if(is.ggproto(add)){
+    p <- ggplot_add(add, p)
+  }
+
+
+  # Annotations
+  if(is.list(annotation)){
+    cross_coord <- get_cross(object, layout = layout)
+    annotation_flag <- 0
+    for(i in c("top", "bottom", "left","right")){
+      i_p <- annotation[[i]]
+      i_b <- annotation[[paste0(i, ".by")]]
+
+      if(!(is.null(i_p) || is.null(i_b))){
+        i_axis <- ifelse(i %in% c("top", "bottom"), "x", "y")
+        i_range <- range(cross_coord[cross_coord$cross == i_b, i_axis])
+        i_prange <- ggplot_build(p)$layout$panel_params[[1]][[paste0(i_axis, ".range")]]
+        i_expand <- if(i_axis == "x"){
+          if(is.numeric(aplot::xrange(i_p))) scale_x_continuous(expand = expansion(mult = abs(i_range - i_prange)/diff(i_prange)))
+          else scale_x_discrete(expand = expansion(mult = abs(i_range - i_prange)/diff(i_range)))
+        }else{
+          if(is.numeric(aplot::yrange(i_p))) scale_y_continuous(expand = expansion(mult = abs(i_range - i_prange)/diff(i_prange)))
+          else scale_y_discrete(expand = expansion(mult = abs(i_range - i_prange)/diff(i_range)))
+        }
+        annotation[[i]] <- i_p + i_expand
+        annotation_flag <- annotation_flag + 1
+      }else{
+        annotation[[paste0(i, ifelse(i %in% c("top", "bottom"), ".height", ".width"))]] <- 0
+        annotation[[i]] <- NULL
+      }
+    }
+    if(annotation_flag > 0){
+      p <- ggpubr::ggarrange(
+        NULL, annotation[["top"]], NULL,
+        annotation[["left"]], p, annotation[["right"]],
+        NULL, annotation[["bottom"]], NULL,
+        ncol = 3, nrow = 3,
+        widths = c(annotation[["left.width"]], 1, annotation[["right.width"]]),
+        heights = c(annotation[["top.height"]], 1, annotation[["bottom.height"]]),
+        align = "hv", common.legend = T
+      )
+    }
+  }
 
   return(p)
 }
 
 
 
-#' copy layout and canvas
+#' Helper for annotation in cl_plot
+#'
+#' @param top,bottom,left,right ggplot object
+#' @param top.by,bottom.by,left.by,right.by name of cross by which to align ggplot
+#' @param top.width,bottom.width,left.width,righ.width width of ggplot to be aligned, relative value to main plot.
+#'
+#' @return a list of arguments
+#' @export
+#'
+#' @examples
+#'
+cl_annotation <- function(
+  top = NULL,  top.by = NULL, top.height = 1,
+  bottom = NULL, bottom.by = NULL, bottom.height = 1,
+  left = NULL, left.by = NULL, left.width = 1,
+  right = NULL, right.by = NULL, righ.width = 1){
+  as.list(environment())
+}
+
+#' copy layout
 #'
 #' @param object a CrossLink object
 #' @param to layout name to save into
 #' @param from layout name to copy from, set NULL to use active layout.
+#' @param crosses a vector of cross names, and only these crosses will be copied or overrided. set NULL or NA for all crosses.
 #' @param override override the existed layout
 #'
 #' @return an updated CrossLink object
@@ -519,7 +698,7 @@ cl_plot <- function(object, layout = NULL,
 #'
 #' @examples
 #'
-cl_copy <- function(object, to, from = NULL, override = F) {
+cl_copy <- function(object, to, from = NULL, crosses = NULL, override = F) {
   cl_layouts <- cl_layouts(object)
   from <- nullna_default(from, default = cl_active(object))
 
@@ -527,12 +706,23 @@ cl_copy <- function(object, to, from = NULL, override = F) {
     warning(from, " is not in layouts, nothing to be done!")
     return(object)
   }
+
+  crosses <- nullna_default(crosses, names(object@cross))
+  layout_ind <- object@layout[[from]][["cross"]] %in% crosses
   if(to %in% cl_layouts){
-    if(override) warning(to, " is already in layouts, which will be overided!")
-    else stop(to, " is already in layouts, set overided = TRUE if you want to override it!")
+    if(override) {
+      warning(to, " is already in layouts, and will be overrided!")
+      to_layout <- object@layout[[to]]
+      to_layout[layout_ind,] <- object@layout[[from]][layout_ind, ]
+
+    }else stop(to, " is already in layouts, set overided = TRUE if you want to override it!")
+  }else{
+    to_layout <- object@layout[[from]][layout_ind, ]
   }
+
+
   message("Copy layout ", from," into ", to, ", and Set active layout to ", to)
-  object@layout[[to]] <- object@layout[[from]]
+  object@layout[[to]] <- to_layout
   # object@canvas[[to]] <- object@canvas[[from]]
   cl_active(object) <- to
 
@@ -610,6 +800,8 @@ cl_rel2abs <- function(object, x = 0, y = 0, crosses = NULL, by.canvas = F, layo
 
   data.frame(x = x, y = y)
 }
+
+
 # new_scale
 # https://eliocamp.github.io/codigo-r/2018/09/multiple-color-and-fill-scales-with-ggplot2/
 

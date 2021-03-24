@@ -11,7 +11,8 @@ cl_plot(
   cross = NULL,
   label = NULL,
   header = NULL,
-  ...
+  add = NULL,
+  annotation = cl_annotation()
 )
 }
 \arguments{
@@ -27,7 +28,7 @@ cl_plot(
 
 \item{header}{a named list of arguments for headers. see \code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}. Set NULL to use default settings, or Set NA to not show.}
 
-\item{...}{other arguments passed to ???}
+\item{add}{other gg object to be added to final plot, such as theme().}
 }
 \value{
 a ggplot2 object
