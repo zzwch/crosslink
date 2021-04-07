@@ -16,7 +16,7 @@ cl_annotation(
   left.width = 1,
   right = NULL,
   right.by = NULL,
-  righ.width = 1
+  right.width = 1
 )
 }
 \arguments{

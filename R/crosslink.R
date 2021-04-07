@@ -617,9 +617,9 @@ cl_plot <- function(object, layout = NULL,
     scale_y_continuous(expand = expansion(mult = 0.1))
 
   # add
-  if(is.ggproto(add)){
+  #if(is.ggproto(add)){
     p <- ggplot_add(add, p)
-  }
+  #}
 
 
   # Annotations
@@ -632,9 +632,11 @@ cl_plot <- function(object, layout = NULL,
 
       if(!(is.null(i_p) || is.null(i_b))){
         i_axis <- ifelse(i %in% c("top", "bottom"), "x", "y")
+        i_axis_ann <- ifelse(layer_scales(i_p)[[i_axis]][["position"]] %in% c("top", "bottom"), "x", "y") # if coord_flip
+
         i_range <- range(cross_coord[cross_coord$cross == i_b, i_axis])
         i_prange <- ggplot_build(p)$layout$panel_params[[1]][[paste0(i_axis, ".range")]]
-        i_expand <- if(i_axis == "x"){
+        i_expand <- if(i_axis_ann == "x"){
           if(is.numeric(aplot::xrange(i_p))) scale_x_continuous(expand = expansion(mult = abs(i_range - i_prange)/diff(i_prange)))
           else scale_x_discrete(expand = expansion(mult = abs(i_range - i_prange)/diff(i_range)))
         }else{
@@ -681,7 +683,7 @@ cl_annotation <- function(
   top = NULL,  top.by = NULL, top.height = 1,
   bottom = NULL, bottom.by = NULL, bottom.height = 1,
   left = NULL, left.by = NULL, left.width = 1,
-  right = NULL, right.by = NULL, righ.width = 1){
+  right = NULL, right.by = NULL, right.width = 1){
   as.list(environment())
 }
 

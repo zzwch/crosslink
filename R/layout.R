@@ -49,10 +49,11 @@ layout_row <- function(object, layout_based = "default", layout_save = NULL, cro
 #' @rdname Predefined_layouts
 #'
 layout_hive <- function(object, angles = NULL, crosses = NULL, layout_based = "default", layout_save = NULL) {
-  n_cross <- length(object@cross)
+  crosses <- nullna_default(crosses, names(object@cross))
+
+  n_cross <- length(crosses)
   if(n_cross < 3) stop("Hive layout is not recommented for crosses of length < 3!")
 
-  crosses <- nullna_default(crosses, names(object@cross))
   angles <- cumsum(nullna_default(angles, c(0, coerce_x_len(360/n_cross, n = n_cross-1))))
 
   if(length(angles) != n_cross) stop("anlges length must be equal with length of crosses")
@@ -78,9 +79,10 @@ layout_hive <- function(object, angles = NULL, crosses = NULL, layout_based = "d
 #' @rdname Predefined_layouts
 #'
 layout_polygon <- function(object, angles = NULL, crosses = NULL, layout_based = "default", layout_save = NULL){
-  n_cross <- length(object@cross)
-  if(n_cross < 3) stop("polygon layout is not recommented for crosses of length < 3!")
   crosses <- nullna_default(crosses, names(object@cross))
+  n_cross <- length(crosses)
+  if(n_cross < 3) stop("polygon layout is not recommented for crosses of length < 3!")
+
   angles <- nullna_default(angles, c(0, coerce_x_len(360/n_cross, n = n_cross-1)))
   angles_cs <- cumsum(angles)
   if(length(angles_cs) != n_cross) stop("anlges length must be equal with length of crosses")
@@ -130,8 +132,8 @@ layout_polygon <- function(object, angles = NULL, crosses = NULL, layout_based =
 #' @rdname Predefined_layouts
 #'
 layout_arc <- function(object, angles = 30, crosses = NULL, layout_based = "default", layout_save = NULL) {
-  n_cross <- length(object@cross)
   crosses <- nullna_default(crosses, names(object@cross))
+  n_cross <- length(crosses)
   angles <- coerce_x_len(angles, n_cross)
   if(length(angles) != n_cross) stop("anlges length must be equal with length of crosses")
 
