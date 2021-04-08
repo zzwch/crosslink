@@ -828,7 +828,40 @@ show_aes <- function(object){
 
 
 
+#' Align crosses in different layouts
+#'
+#' @param object CrossLink object
+#' @param crosses.1 crosses in group 1
+#' @param crosses.2 crosses in group 2
+#' @param align.x align both groups in x
+#' @param align.y align both groups in y
+#' @param anchor.1 relative coordinates of the anchor in group 1 by which to align
+#' @param anchor.2 relative coordinates of the anchor in group 2 by which to align
+#' @param layout which layout coordinates to be used
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#'
+cl_align <- function(object, crosses.1, crosses.2, align.x = F, align.y = F, anchor.1 = c(0.5, 0.5), anchor.2 = c(0.5, 0.5), layout = NULL){
 
+  layout <- nullna_default(layout, default = cl_active(object))
+
+  anchor.1 <- coerce_x_len(anchor.1, 2)
+  anchor.2 <- coerce_x_len(anchor.2, 2)
+
+  anchor.1 <- c(scales::rescale(anchor.1[1], to = cl_xrange(object, crosses = crosses.1, layout = layout), from = c(0,1)),
+                scales::rescale(anchor.1[2], to = cl_yrange(object, crosses = crosses.1, layout = layout), from = c(0,1)))
+
+  anchor.2 <- c(scales::rescale(anchor.2[1], to = cl_xrange(object, crosses = crosses.2, layout = layout), from = c(0,1)),
+                scales::rescale(anchor.2[2], to = cl_yrange(object, crosses = crosses.2, layout = layout), from = c(0,1)))
+
+  xshift <- ifelse(align.x, anchor.1[1] - anchor.2[1], 0)
+  yshift <- ifelse(align.y, anchor.1[2] - anchor.2[2], 0)
+
+  tf_shift(object, x = xshift, y = yshift, crosses = crosses.2, relative = F, layout = layout)
+}
 
 #
 # pl_crosslink(

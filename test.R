@@ -29,10 +29,7 @@ object %>%
                        scale = list(
                          #color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Spectral"))
                          ))
-          , annotation = cl_annotation(p1, "B",1,
-                                       p1, "C",1,
-                                       p1, "D",1,
-                                       p1, "F",1)) %>%
+          ) %>%
   #cl_void() %>%
   print()
 
