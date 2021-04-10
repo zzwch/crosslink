@@ -12,31 +12,36 @@ edges <- data.frame(rbind(
   # gene vs mir
   data.frame(
     source = sample(nodes$id[nodes$type == "Gene"],
-                    replace = T, 30),
+                    replace = T, 15),
     target = sample(nodes$id[nodes$type == "Mir"],
-                    replace = T, 30),
-    type=rep("Gene",30)),
+                    replace = T, 15),
+    type   = rep("Mir",15),
+    cor    = sample(seq(0,1,by=0.05),15)
+    ),
   # gene vs drug
   data.frame(
     source = sample(nodes$id[nodes$type == "Gene"],
-                    replace = T, 100),
+                    replace = T, 10),
     target = sample(nodes$id[nodes$type == "Drug"],
-                    replace = T, 100),
-    type=rep("Gene",100)),
+                    replace = T, 10),
+    type=rep("Gene",10),
+    cor    = sample(seq(0,1,by=0.01),10)),
   # meth vs drug
   data.frame(
     source = sample(nodes$id[nodes$type == "Meth"],
-                    replace = T, 100),
+                    replace = T, 8),
     target = sample(nodes$id[nodes$type == "Drug"],
-                    replace = T, 100),
-    type=rep("Meth",100)),
+                    replace = T, 8),
+    type=rep("Meth",8),
+    cor    = sample(seq(0,1,by=0.05),8)),
   # mir vs drug
   data.frame(
     source = sample(nodes$id[nodes$type == "Mir"],
-                    replace = T, 20),
+                    replace = T, 5),
     target = sample(nodes$id[nodes$type == "Drug"],
-                    replace = T, 20),
-    type=rep("Drug",20))
+                    replace = T, 5),
+    type=rep("Drug",5),
+    cor    = sample(seq(0,1,by=0.1),5))
 ))
 
 
