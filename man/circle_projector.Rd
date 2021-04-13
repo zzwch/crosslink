@@ -35,3 +35,4 @@ for sources of -x or -y, projected points will be at the left or down half circl
 \examples{
 
 }
+\keyword{internal}

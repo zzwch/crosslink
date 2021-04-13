@@ -8,9 +8,9 @@ Description: Visualization for Network of Grouped Nodes.
     Class CrossLink and several methods were implemented to map nodes and edges into the cartesian coordinates, and to easily perform transformation by affine matrix or function mapping (eg. sin/cos, etc).
     Coordinates data could be achieved from CrossLink object, which could be visualized using ggplot2 (eg. geom_point/text/segment, etc.).
     Several useful layouts also being built-in defined, such as column, row, hive, circle, arc, polygon. Users can also custom their own preferred layouts easily using built-in transformation functions.
-Imports: ggplot2, magrittr, aplot, ggpubr
+Imports: ggplot2, magrittr, aplot, patchwork
 Depends: 
-    ggplot2,
+    ggplot2, magrittr,
     R (>= 2.10)
 License: GPL-2 | file LICENSE
 Encoding: UTF-8

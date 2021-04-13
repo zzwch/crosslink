@@ -548,6 +548,7 @@ get_header <- function(object, layout = NULL){
 #' For link, cross, label, header: "geom" is restricted for setting geom function, such as list(geom = "arc") for link.
 #'
 #' @import ggplot2
+#' @import patchwork
 #' @md
 #' @export
 #'
@@ -651,14 +652,17 @@ cl_plot <- function(object, layout = NULL,
       }
     }
     if(annotation_flag > 0){
-      p <- ggpubr::ggarrange(
-        NULL, annotation[["top"]], NULL,
-        annotation[["left"]], p, annotation[["right"]],
-        NULL, annotation[["bottom"]], NULL,
-        ncol = 3, nrow = 3,
-        widths = c(annotation[["left.width"]], 1, annotation[["right.width"]]),
-        heights = c(annotation[["top.height"]], 1, annotation[["bottom.height"]]),
-        align = "hv", common.legend = T
+
+      p <- annotation[["top"]] + annotation[["left"]] + p + annotation[["right"]] + annotation[["bottom"]] +
+        patchwork::plot_layout(ncol = 3, nrow = 3,
+                               widths = c(annotation[["left.width"]], 1, annotation[["right.width"]]),
+                               heights = c(annotation[["top.height"]], 1, annotation[["bottom.height"]]),
+                               guides = "collect",
+                               design = c(patchwork::area(1,2,1,2),
+                                          patchwork::area(2,1,2,1),
+                                          patchwork::area(2,2,2,2),
+                                          patchwork::area(2,3,2,3),
+                                          patchwork::area(3,2,3,2))
       )
     }
   }
@@ -810,7 +814,7 @@ cl_rel2abs <- function(object, x = 0, y = 0, crosses = NULL, by.canvas = F, layo
 
 
 
-#' show available aes
+#' show available aesthetic
 #'
 #' @param object a CrossLink object
 #'

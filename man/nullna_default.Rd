@@ -21,3 +21,4 @@ a helper function to set default value when inputting NULL or NA
 nullna_default(NULL, c(1,2))
 
 }
+\keyword{internal}

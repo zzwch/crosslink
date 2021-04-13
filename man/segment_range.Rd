@@ -25,3 +25,4 @@ cut a segment defined by a range in 1D coordinate into n pieces
 segment_range(c(0,10), 3, scale = c(1, 2, 7), return.cutter = F)
 
 }
+\keyword{internal}

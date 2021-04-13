@@ -70,3 +70,4 @@ mat <- transform_matrix_affine(type = "shear", x = 0, y = pi*45/180, countercloc
 mat <- transform_matrix_affine(type = "reflect", x = 1, y = 1, theta = pi*45/180)
 
 }
+\keyword{internal}

@@ -40,3 +40,4 @@ a helper function for 3*3 matrix
 transform_matrix(a = 2, e = 2, i = 2)
 
 }
+\keyword{internal}

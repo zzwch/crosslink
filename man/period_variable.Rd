@@ -33,3 +33,4 @@ get period variables with same return value
 period_variable(pi, 2*pi, c(-pi, 5*pi))
 
 }
+\keyword{internal}

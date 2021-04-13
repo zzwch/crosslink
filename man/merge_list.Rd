@@ -20,3 +20,4 @@ Merge two list
 \examples{
 merge_list(list(1, A = 2, B = 3, 4), list(A = 22, 5, 1))
 }
+\keyword{internal}

@@ -19,3 +19,4 @@ convert radian to degree
 degree_to_radian(pi)
 
 }
+\keyword{internal}

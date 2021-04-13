@@ -2,7 +2,7 @@
 % Please edit documentation in R/crosslink.R
 \name{show_aes}
 \alias{show_aes}
-\title{show available aes}
+\title{show available aesthetic}
 \usage{
 show_aes(object)
 }
@@ -10,7 +10,7 @@ show_aes(object)
 \item{object}{a CrossLink object}
 }
 \description{
-show available aes
+show available aesthetic
 }
 \examples{
 

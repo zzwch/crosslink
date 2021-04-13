@@ -35,3 +35,4 @@ ggplot() +
   coord_fixed()
 
 }
+\keyword{internal}
