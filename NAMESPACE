@@ -3,6 +3,7 @@
 export("cl_active<-")
 export(circle_projector)
 export(cl_active)
+export(cl_align)
 export(cl_annotation)
 export(cl_coord)
 export(cl_copy)
