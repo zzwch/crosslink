@@ -31,3 +31,4 @@ interval_inclusion(x, interval = c(0.5, 1), inclusion = "both")
 interval_inclusion(x, interval = c(0.5, 1), inclusion = "neither")
 
 }
+\keyword{internal}

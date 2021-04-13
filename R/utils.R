@@ -7,7 +7,7 @@
 #' @param drop drop levels of x
 #'
 #' @return a list. Order of elements is controled by levels of group.
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' tolist_by_group(x = 1:10, group = c(rep("A", 5), rep("B", 5)))
@@ -52,7 +52,7 @@ todataframe_by_list <- function(list){
 #' @param default returned default value if x is NULL or NA
 #'
 #' @return x or default asis
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' nullna_default(NULL, c(1,2))
@@ -69,7 +69,7 @@ nullna_default <- function(x, default) {
 #' @param return.cutter only return the coordinate values of internal cutters
 #'
 #' @return a vector of n+1 or n-1 if \code{return.cutter}
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' segment_range(c(0,10), 3, scale = c(1, 2, 7), return.cutter = F)
@@ -92,7 +92,7 @@ segment_range <- function(range = c(0, 1), n, scale = NA, return.cutter = T){
 #' @param range a vector of 2 numeric values defining a interval, where \code{x} will be mapped.
 #'
 #' @return a vector of length(x)
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' vector_to_coord(1:4, scale = c(2,2,2), range(1, 9))
@@ -138,7 +138,7 @@ index_to_name <- function(x, ind){
 #' @param unlist unlist \code{x} before repeatedly being used
 #'
 #' @return a vector of \code{n} length
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' coerce_x_len(1, 10)
@@ -180,7 +180,7 @@ list_along <- function(names, default = NA, some = NA){
 #' @param y another list. Elements having same names in \code{x} will be override by those in \code{y}.
 #'
 #' @return a merged list
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' merge_list(list(1, A = 2, B = 3, 4), list(A = 22, 5, 1))
@@ -230,7 +230,7 @@ gen_demo <- function(n_cross = 2, n_link = c(10), n_node = c(3,4), seed = 6){
 #'
 #' @return a updated aes
 #' @import rlang
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #'
@@ -260,7 +260,7 @@ override_aes <- function(mapping = NULL, default_aes){
 #' @param degree angle in degree
 #'
 #' @return angle in radian
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' degree_to_radian(180)
@@ -274,7 +274,7 @@ degree_to_radian <- function(degree) {
 #' @param radian angle in radian
 #'
 #' @return angle in degree
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' degree_to_radian(pi)
@@ -290,7 +290,7 @@ radian_to_degree <- function(radian) {
 #' @param inclusion defining inclusion
 #'
 #' @return a vector
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' x <- seq(0, 1, length.out = 9)
@@ -319,7 +319,7 @@ interval_inclusion <- function(x, interval = NULL, inclusion = c("left", "both",
 #' @param simplify return list or not, see \code{\link{sapply}}
 #'
 #' @return a vector
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' period_variable(pi, 2*pi, c(-pi, 5*pi))
@@ -342,7 +342,7 @@ period_variable <- function(x, period, range = c(0, period), range.inclusion = c
 #' @param return.range set NULL for a range of 0 to 2*pi.
 #'
 #' @return angles in radian
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #'
@@ -378,7 +378,7 @@ period_arcTrig <- function(x, y = NULL, arc.fun = c("acos", "asin", "atan", "ata
 #' centers matched. This function will return both centers in a order of left
 #' center and right center. For brevity, the radian will always less than pi (0-2*pi).
 #'
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' string_to_circle(-1, 0, 1, 0, pi)
@@ -439,7 +439,7 @@ string_to_circle <- function(x, y, xend, yend, radian = NULL, radius = NULL) {
 #' for sources of -x or -y, projected points will be at the left or down half circle
 #'
 #' @return data.frame of coordinates of projected points
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #'

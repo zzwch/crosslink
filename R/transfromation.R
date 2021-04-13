@@ -185,7 +185,7 @@ tf_scale <- function(
 
 }
 
-#' Transformation by given function
+#' Transformation by a given function
 #'
 #' @param object a CrossLink object
 #' @param fun function for coordinate transformation
@@ -281,7 +281,7 @@ tf_fun <- function(
 #' - shear: x, y, counterclockwise
 #' - reflect: x, y, theta (angle from x axis), counterclockwise
 #'
-#' @export
+#' @keywords internal
 #' @examples
 #'
 #' # eigen matrix
@@ -357,7 +357,7 @@ transform_matrix_affine <- function(
 #' d, e, f
 #' g, h, i
 #' )
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' transform_matrix(a = 2, e = 2, i = 2)
@@ -377,7 +377,7 @@ transform_matrix <- function(
 #' @param matrix a 3*3 affine transformation matrix
 #'
 #' @return a matrix of transformed coordinates
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' # coordinate for a unit square
@@ -416,7 +416,7 @@ transform_by_matrix <- function(x, y = NULL, matrix = transform_matrix_affine("n
 #' @param ... other parameters passed to \code{fun}
 #'
 #' @return a matrix of transformed coordinates
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' xy <- data.frame(x = 1,

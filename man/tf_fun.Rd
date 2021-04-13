@@ -2,7 +2,7 @@
 % Please edit documentation in R/transfromation.R
 \name{tf_fun}
 \alias{tf_fun}
-\title{Transformation by given function}
+\title{Transformation by a given function}
 \usage{
 tf_fun(
   object,
@@ -38,7 +38,7 @@ tf_fun(
 an updated CrossLink object
 }
 \description{
-Transformation by given function
+Transformation by a given function
 }
 \examples{
 

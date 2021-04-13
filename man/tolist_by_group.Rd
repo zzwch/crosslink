@@ -23,3 +23,4 @@ convert x (a vector) into a list according to the group information (another vec
 tolist_by_group(x = 1:10, group = c(rep("A", 5), rep("B", 5)))
 
 }
+\keyword{internal}

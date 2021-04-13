@@ -19,3 +19,4 @@ convert degree to radian
 degree_to_radian(180)
 
 }
+\keyword{internal}

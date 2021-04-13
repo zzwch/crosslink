@@ -13,7 +13,8 @@
 #'
 #' \code{layout_row} and \code{layout_column} will always based on \code{default} layout.
 #'
-#' @name Predefined_layouts
+#' @name layout_column
+#'
 #'
 #' @examples
 #'
@@ -30,7 +31,7 @@ layout_column <- function(object, layout_based = "default", layout_save = NULL, 
 }
 
 #' @export
-#' @rdname Predefined_layouts
+#' @rdname layout_column
 #'
 layout_row <- function(object, layout_based = "default", layout_save = NULL, crosses = NULL){
   crosses <- nullna_default(crosses, names(object@cross))
@@ -46,7 +47,7 @@ layout_row <- function(object, layout_based = "default", layout_save = NULL, cro
 }
 
 #' @export
-#' @rdname Predefined_layouts
+#' @rdname layout_column
 #'
 layout_hive <- function(object, angles = NULL, crosses = NULL, layout_based = "default", layout_save = NULL) {
   crosses <- nullna_default(crosses, names(object@cross))
@@ -76,7 +77,7 @@ layout_hive <- function(object, angles = NULL, crosses = NULL, layout_based = "d
 }
 
 #' @export
-#' @rdname Predefined_layouts
+#' @rdname layout_column
 #'
 layout_polygon <- function(object, angles = NULL, crosses = NULL, layout_based = "default", layout_save = NULL){
   crosses <- nullna_default(crosses, names(object@cross))
@@ -129,7 +130,7 @@ layout_polygon <- function(object, angles = NULL, crosses = NULL, layout_based =
 }
 
 #' @export
-#' @rdname Predefined_layouts
+#' @rdname layout_column
 #'
 layout_arc <- function(object, angles = 30, crosses = NULL, layout_based = "default", layout_save = NULL) {
   crosses <- nullna_default(crosses, names(object@cross))

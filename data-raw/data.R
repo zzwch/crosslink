@@ -62,4 +62,17 @@ mirData <- data.frame(
   mir = nodes$id[nodes$type == "Mir"],# set the order as you want
   lfc = runif(length(nodes$id[nodes$type == "Mir"]), -4,0))
 
-usethis::use_data(edges, nodes, geneData, methData, mirData, overwrite = T)
+n <- 4
+set.seed(n)
+demo1 <- gen_demo(n_cross = n,
+                 n_node = sample(4:6, size = n, replace = T),
+                 n_link = sample(4:6, size = n-1, replace = T),
+                 seed = 1314)
+
+demo2 <- list(edges = edges,
+              nodes = nodes,
+              geneData = geneData,
+              methData = methData,
+              mirData = mirData)
+
+usethis::use_data(demo1, demo2, overwrite = T)

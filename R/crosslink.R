@@ -814,7 +814,7 @@ cl_rel2abs <- function(object, x = 0, y = 0, crosses = NULL, by.canvas = F, layo
 
 
 
-#' show available aes
+#' show available aesthetic
 #'
 #' @param object a CrossLink object
 #'

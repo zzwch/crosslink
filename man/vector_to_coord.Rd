@@ -23,3 +23,4 @@ convert a vector of characters to a vector of numeric coordinates
 vector_to_coord(1:4, scale = c(2,2,2), range(1, 9))
 
 }
+\keyword{internal}

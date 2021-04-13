@@ -23,3 +23,4 @@ use a vector repeatedly to generate a new vector of the specified length
 coerce_x_len(1, 10)
 
 }
+\keyword{internal}

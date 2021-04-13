@@ -29,3 +29,4 @@ get arc-trigonometric values in periods
 \examples{
 
 }
+\keyword{internal}
