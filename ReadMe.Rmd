@@ -1,8 +1,8 @@
+---
+  title: crosslink An R package for network visualization of grouped nodes
+  output: html_document
+---
 
-# crosslink: An R package for network visualization of grouped nodes
-
-<!-- badges: start -->
-<!-- badges: end -->
 
 The goal of crosslink is to visualize the network of grouped nodes
 
@@ -10,17 +10,17 @@ The goal of crosslink is to visualize the network of grouped nodes
 
 You can install the released version of crosslink from [github](https://github.com/zzwch/crosslink) with:
 
-``` r
-devtools::install_github("zzwch/crosslinks") 
-install.packages("aplot")
+```{r}
+#devtools::install_github("zzwch/crosslinks") 
+#install.packages("aplot")
 ```
 
 ## 2. Quick start
 
 Examples of typical crosslonk usage.
 
-``` r
-library(crosslink)
+```{r}
+#library(crosslink)
 
 load("data/demo.RData")
 
@@ -46,12 +46,12 @@ b. edges data (must have two columns: source node and target node).
 
 crosslink also provides the function 'gen_demo' to generate demo data. 
 
-``` r
-library(crosslink)
+```{r}
+#library(crosslink)
 
 # generate demo data
 n <- 6
-demo <- gen_demo(n_cross = n,n_node = 1:n, n_link = 1:(n-1), seed = 66)
+demo <- gen_demo(n_cross = n,n_node = 4:(n+3), n_link = 3:(n+1), seed = 66)
 nodes <- demo$nodes
 edges <- demo$edges
 cross.by <- demo$cross.by
@@ -63,7 +63,7 @@ cross.by <- demo$cross.by
 crosslink can help to generate an object of crosslink class for plot.
 
 
-``` r
+```{r}
 # users can define 'odd.rm' to choose if remove the nodes have zero relationship with any other nodes when generate crosslink class
 # user can set intervals between nodes and gaps through spaces and gaps.
 cl <- crosslink(nodes, edges, cross.by, odd.rm = F,spaces = "flank")
@@ -82,7 +82,7 @@ Coordinate transformation consists of affine transformation and functional trans
 The `tf_affine` function contains `tf_rotate`, `tf_shift`, `tf_shear`, `tf_flip` and `tf_scale` function. 
 The `tf_fun` interface allows user to custom transforming function.
 
-``` r
+```{r}
 
 # tf_rotate, rotating in a specific angle with (x,y) as the center.
 cl %>% tf_rotate(x=0,y=1,angle = 45) %>% cl_plot()
@@ -100,10 +100,10 @@ cl %>% tf_flip(axis = "y") %>% cl_plot()
 cl %>% tf_scale(x=0,y=1,scale = 5) %>% cl_plot() 
 
 # tf_fun, coordinate transformation according to custom-defined function
-cl %>% tf_fun(fun = sin,along = "x") %>% cl_plot()
+cl %>% tf_fun(fun = sin,along = "y",xrange.from=c(0,0.5*pi)) %>% cl_plot()
 
 # combined tf functions
-cl %>% tf_flip(axis = "y") %>% tf_fun(fun = sin,along = "x") %>% cl_plot()
+cl %>% tf_flip(axis = "y") %>% tf_fun(fun = sin,along = "y",xrange.from=c(0,0.5*pi)) %>% cl_plot()
 
 ```
 
@@ -114,7 +114,7 @@ a. Commonly used styles are predefined in layout module, including row, column, 
 crosses can be specified in all five layout module
 b. ‘set_header’ function is provided to conveniently place cross headers
 
-``` r
+```{r}
 # default layout module is column
 cl %>% cl_plot()
 cl %>% layout_column() %>% cl_plot()
@@ -126,7 +126,7 @@ cl %>% layout_row() %>% cl_plot()
 cl %>% layout_arc(angles = 60,crosses = c("E","F")) %>% cl_plot()
 
 # layout by polygon (list of angles must have the same length with crosses)
-cl %>% layout_polygon(angles = rep(45,6)) %>% cl_plot()
+cl %>% layout_polygon() %>% cl_plot()
 
 # layout by hive
 cl %>% layout_hive() %>% cl_plot()
@@ -147,11 +147,13 @@ b. aesthetic settings ( The color, size, type and text of the nodes and lines in
 c. combination of the network diagram with the corresponding node annotation image in aligning coordinates
 
 #### a. quick plotting
-``` r
+```{r}
 cl %>% cl_plot()
 ```
+
+
 #### b. aesthetic settings
-``` r
+```{r}
 # aesthetic settings based on ggplot2 system, some specific examples are shown below.
 
 # set colors, shapes and size of nodes
@@ -181,7 +183,7 @@ cl %>% cl_plot(header = list(mapping = aes(color= cross),
 
 # set figure theme
 # add:	other gg object to be added to final plot, such as theme().
-theme_use <- theme(legend.position = "none",
+theme_use <- theme(legend.position = "none",aspect.ratio = 1,
                    axis.title = element_blank(),
                    axis.text = element_blank(),
                    axis.ticks = element_blank(),
@@ -190,8 +192,10 @@ theme_use <- theme(legend.position = "none",
 cl %>% cl_plot(add=theme_use)
 
 ```
+
+
 #### c. annotation figure
-``` r
+```{r}
 # cl_annotation： add annotation figure. 
 # top, bottom, left or  right	: ggplot object
 # top.by, bottom.by, left.by, right.by : name of cross by which to align ggplot
@@ -210,7 +214,7 @@ There are examples used in paper and practical application.
 ### 1). examples used in paper
 
 #### a. layout by row
-``` r
+```{r}
 load("data/demo.RData")
 cl <- crosslink(demo$nodes, demo$edges, demo$cross.by, odd.rm = F,spaces = "flank")
 
@@ -231,10 +235,10 @@ cl %>% layout_row() %>%
 ```
 
 #### b. layout by rotate
-``` r
+```{r}
 
 cl %>% 
-   tf_rotate(angle = 30, by.each.cross = T) %>%
+   tf_rotate(angle = 15, by.each.cross = T) %>%
    cl_plot(cross = list(mapping = aes(color = type),
                        scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
                        size=10,shape=16
@@ -250,7 +254,7 @@ cl %>%
 ```
 
 #### c. layout by polygon
-``` r
+```{r}
 cl %>% layout_polygon() %>%
    #tf_rotate(angle = 45, by.each.cross = F) %>%  # If the grouping is 4, rotate by this parameter and change from diamond to square 
    cl_plot(cross = list(mapping = aes(color = type),
@@ -269,7 +273,7 @@ cl %>% layout_polygon() %>%
 
 #### d. layout by hive
 
-``` r
+```{r}
 cl %>% layout_hive(angles=rep(60,6)) %>% #length of angles must be same with the numbers of groups
        cl_plot(cross = list(mapping = aes(color = type),
                        scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
@@ -287,7 +291,7 @@ cl %>% layout_hive(angles=rep(60,6)) %>% #length of angles must be same with the
 
 #### e. layout by arc
 
-``` r
+```{r}
 cl %>% layout_arc(angles=c(60,120,180),crosses=c("D","E","F")) %>% #length of angles must be same with the numbers of crosses
        cl_plot(cross = list(mapping = aes(color = type),
                             scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
@@ -305,7 +309,7 @@ cl %>% layout_arc(angles=c(60,120,180),crosses=c("D","E","F")) %>% #length of an
 
 #### f. layout by combination of several methods
 
-``` r
+```{r}
 
 # demo data
 n <- 5
@@ -340,7 +344,7 @@ cl %>%
 
 ### 2). examples of complex figure
 
-``` r
+```{r}
 source("R/data.R")
 library(dplyr)
 theme_classic() +
@@ -432,7 +436,10 @@ cl_plot(cl,
                     ,angle=c(rep(0,8),rep(90,10),rep(0,10),rep(90,6))
                     ,nudge_x=c(rep(-2,8),rep(0,10),rep(2,10),rep(0,6))
                     ,nudge_y=c(rep(0,8),rep(-2,10),rep(0,10),rep(2,6))),
-           add   =  theme_use)
+       add   =  theme(panel.background = element_blank(),axis.title = element_blank(),
+                      panel.grid = element_blank(),
+                      axis.ticks = element_blank(),
+                      axis.text = element_blank()))
 
 
 ```
