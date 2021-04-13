@@ -8,6 +8,7 @@
 #'
 #' @return a list. Order of elements is controled by levels of group.
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' tolist_by_group(x = 1:10, group = c(rep("A", 5), rep("B", 5)))
@@ -27,6 +28,7 @@ tolist_by_group <- function(x, group, drop = F) {
 #'
 #' @return data.frame
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' todataframe_by_list(list(num = c(1:10), cat = c(rep("A", 5), rep("B", 5))))
@@ -53,6 +55,7 @@ todataframe_by_list <- function(list){
 #'
 #' @return x or default asis
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' nullna_default(NULL, c(1,2))
@@ -70,6 +73,7 @@ nullna_default <- function(x, default) {
 #'
 #' @return a vector of n+1 or n-1 if \code{return.cutter}
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' segment_range(c(0,10), 3, scale = c(1, 2, 7), return.cutter = F)
@@ -93,6 +97,7 @@ segment_range <- function(range = c(0, 1), n, scale = NA, return.cutter = T){
 #'
 #' @return a vector of length(x)
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' vector_to_coord(1:4, scale = c(2,2,2), range(1, 9))
@@ -111,6 +116,7 @@ vector_to_coord <- function(x, scale = NA, range = c(0, 1)){ # scale = x-1  in l
 #'
 #' @return a vector of characters
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' index_to_name(data.frame(A = 1, B = 2), 1)
@@ -139,6 +145,7 @@ index_to_name <- function(x, ind){
 #'
 #' @return a vector of \code{n} length
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' coerce_x_len(1, 10)
@@ -181,6 +188,7 @@ list_along <- function(names, default = NA, some = NA){
 #'
 #' @return a merged list
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' merge_list(list(1, A = 2, B = 3, 4), list(A = 22, 5, 1))
@@ -231,6 +239,7 @@ gen_demo <- function(n_cross = 2, n_link = c(10), n_node = c(3,4), seed = 6){
 #' @return a updated aes
 #' @import rlang
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #'
@@ -261,6 +270,7 @@ override_aes <- function(mapping = NULL, default_aes){
 #'
 #' @return angle in radian
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' degree_to_radian(180)
@@ -275,6 +285,7 @@ degree_to_radian <- function(degree) {
 #'
 #' @return angle in degree
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' degree_to_radian(pi)
@@ -291,6 +302,7 @@ radian_to_degree <- function(radian) {
 #'
 #' @return a vector
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' x <- seq(0, 1, length.out = 9)
@@ -320,6 +332,7 @@ interval_inclusion <- function(x, interval = NULL, inclusion = c("left", "both",
 #'
 #' @return a vector
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' period_variable(pi, 2*pi, c(-pi, 5*pi))
@@ -343,6 +356,7 @@ period_variable <- function(x, period, range = c(0, period), range.inclusion = c
 #'
 #' @return angles in radian
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #'
@@ -379,6 +393,7 @@ period_arcTrig <- function(x, y = NULL, arc.fun = c("acos", "asin", "atan", "ata
 #' center and right center. For brevity, the radian will always less than pi (0-2*pi).
 #'
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' string_to_circle(-1, 0, 1, 0, pi)
@@ -440,6 +455,7 @@ string_to_circle <- function(x, y, xend, yend, radian = NULL, radius = NULL) {
 #'
 #' @return data.frame of coordinates of projected points
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #'

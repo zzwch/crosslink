@@ -11,8 +11,10 @@ The goal of crosslink is to visualize the network of grouped nodes
 You can install the released version of crosslink from [github](https://github.com/zzwch/crosslink) with:
 
 ```{r}
-#devtools::install_github("zzwch/crosslinks") 
-#install.packages("aplot")
+
+devtools::install_github("zzwch/crosslinks") 
+library(crosslink)
+
 ```
 
 ## 2. Quick start
@@ -20,9 +22,6 @@ You can install the released version of crosslink from [github](https://github.c
 Examples of typical crosslonk usage.
 
 ```{r}
-#library(crosslink)
-
-load("data/demo.RData")
 
 cl <- crosslink(demo$nodes, demo$edges, demo$cross.by, odd.rm = F,spaces = "flank")
 cl %>% cl_plot()
@@ -47,7 +46,6 @@ b. edges data (must have two columns: source node and target node).
 crosslink also provides the function 'gen_demo' to generate demo data. 
 
 ```{r}
-#library(crosslink)
 
 # generate demo data
 n <- 6
@@ -200,8 +198,9 @@ cl %>% cl_plot(add=theme_use)
 # top, bottom, left or  right	: ggplot object
 # top.by, bottom.by, left.by, right.by : name of cross by which to align ggplot
 
-ann.data <- data.frame(F=factor(paste0("F",c(1:6)),levels=paste0("F",c(6:1))),value=c(6:1))
+ann.data <- data.frame(F=factor(paste0("F",c(1:10)),levels=paste0("F",c(10:1))),value=sample(size = 10,x=c(1:10)))
 ann.data %>% ggplot(mapping = aes(x=F,y=value))+geom_bar(stat="identity")+coord_flip() -> rgtAnn
+
 cl %>% cl_plot(annotation=cl_annotation(right= rgtAnn,right.by ="F"))
 
 ```
@@ -215,7 +214,7 @@ There are examples used in paper and practical application.
 
 #### a. layout by row
 ```{r}
-load("data/demo.RData")
+
 cl <- crosslink(demo$nodes, demo$edges, demo$cross.by, odd.rm = F,spaces = "flank")
 
 cl %>% layout_row() %>%
@@ -345,8 +344,9 @@ cl %>%
 ### 2). examples of complex figure
 
 ```{r}
-source("R/data.R")
+
 library(dplyr)
+library(reshape)
 theme_classic() +
   theme(axis.text = element_blank(),
         axis.line.x = element_blank(),
@@ -354,7 +354,7 @@ theme_classic() +
 
 
 ## crosslink project
-cl <- crosslink(nodes,edges,cross.by="type")
+cl <- crosslink(example$nodes,example$edges,cross.by="type")
 
 cl %>% cl_plot()
 
@@ -376,7 +376,7 @@ topAnn <-  mirData %>%
   ggplot(mapping = aes(x=mir,y=-lfc)) +
   geom_bar(fill = "#E7298A",
            stat = "identity",
-           width = 0.5) + # 间距跟bar同宽
+           width = 0.5) + 
   labs(x = NULL, y = "log2(Fold Change)") +
   theme_use2
 topAnn
@@ -416,7 +416,7 @@ ggplot(data = melt(mat), aes(X1, X2, fill = value))+
           axis.line = element_blank(),
           axis.ticks = element_blank(),
            axis.text = element_blank()) -> lftAnno
-
+lftAnno
 
 cl_plot(cl,
        annotation=cl_annotation(top = topAnn,top.by = "Mir",top.height = 0.5,

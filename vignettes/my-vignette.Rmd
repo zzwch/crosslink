@@ -1,8 +1,18 @@
+---
+title: "crosslink-vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
-# crosslink
-
-<!-- badges: start -->
-<!-- badges: end -->
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
 The goal of crosslink is to visualize the network of grouped nodes
 
@@ -10,18 +20,17 @@ The goal of crosslink is to visualize the network of grouped nodes
 
 You can install the released version of crosslink from [github](https://github.com/zzwch/crosslink) with:
 
-``` r
-
-devtools::install_github("zzwch/crosslinks") 
+```{r}
+devtools::install_github("zzwch/crosslinks",force = TRUE) 
 library(crosslink)
-
 ```
 
 ## 2. Quick start
 
 Examples of typical crosslonk usage.
 
-``` r
+```{r}
+#library(crosslink)
 
 cl <- crosslink(demo$nodes, demo$edges, demo$cross.by, odd.rm = F,spaces = "flank")
 cl %>% cl_plot()
@@ -45,7 +54,8 @@ b. edges data (must have two columns: source node and target node).
 
 crosslink also provides the function 'gen_demo' to generate demo data. 
 
-``` r
+```{r}
+#library(crosslink)
 
 # generate demo data
 n <- 6
@@ -61,7 +71,7 @@ cross.by <- demo$cross.by
 crosslink can help to generate an object of crosslink class for plot.
 
 
-``` r
+```{r}
 # users can define 'odd.rm' to choose if remove the nodes have zero relationship with any other nodes when generate crosslink class
 # user can set intervals between nodes and gaps through spaces and gaps.
 cl <- crosslink(nodes, edges, cross.by, odd.rm = F,spaces = "flank")
@@ -80,7 +90,7 @@ Coordinate transformation consists of affine transformation and functional trans
 The `tf_affine` function contains `tf_rotate`, `tf_shift`, `tf_shear`, `tf_flip` and `tf_scale` function. 
 The `tf_fun` interface allows user to custom transforming function.
 
-``` r
+```{r}
 
 # tf_rotate, rotating in a specific angle with (x,y) as the center.
 cl %>% tf_rotate(x=0,y=1,angle = 45) %>% cl_plot()
@@ -112,7 +122,7 @@ a. Commonly used styles are predefined in layout module, including row, column, 
 crosses can be specified in all five layout module
 b. ‘set_header’ function is provided to conveniently place cross headers
 
-``` r
+```{r}
 # default layout module is column
 cl %>% cl_plot()
 cl %>% layout_column() %>% cl_plot()
@@ -145,13 +155,13 @@ b. aesthetic settings ( The color, size, type and text of the nodes and lines in
 c. combination of the network diagram with the corresponding node annotation image in aligning coordinates
 
 #### a. quick plotting
-``` r
+```{r}
 cl %>% cl_plot()
 ```
 
 
 #### b. aesthetic settings
-``` r
+```{r}
 # aesthetic settings based on ggplot2 system, some specific examples are shown below.
 
 # set colors, shapes and size of nodes
@@ -193,14 +203,13 @@ cl %>% cl_plot(add=theme_use)
 
 
 #### c. annotation figure
-``` r
+```{r}
 # cl_annotation： add annotation figure. 
 # top, bottom, left or  right	: ggplot object
 # top.by, bottom.by, left.by, right.by : name of cross by which to align ggplot
 
-ann.data <- data.frame(F=factor(paste0("F",c(1:10)),levels=paste0("F",c(10:1))),value=sample(size = 10,x=c(1:10)))
+ann.data <- data.frame(F=factor(paste0("F",c(1:6)),levels=paste0("F",c(6:1))),value=c(6:1))
 ann.data %>% ggplot(mapping = aes(x=F,y=value))+geom_bar(stat="identity")+coord_flip() -> rgtAnn
-
 cl %>% cl_plot(annotation=cl_annotation(right= rgtAnn,right.by ="F"))
 
 ```
@@ -213,8 +222,8 @@ There are examples used in paper and practical application.
 ### 1). examples used in paper
 
 #### a. layout by row
-``` r
-
+```{r}
+load("data/demo.RData")
 cl <- crosslink(demo$nodes, demo$edges, demo$cross.by, odd.rm = F,spaces = "flank")
 
 cl %>% layout_row() %>%
@@ -234,7 +243,7 @@ cl %>% layout_row() %>%
 ```
 
 #### b. layout by rotate
-``` r
+```{r}
 
 cl %>% 
    tf_rotate(angle = 15, by.each.cross = T) %>%
@@ -253,7 +262,7 @@ cl %>%
 ```
 
 #### c. layout by polygon
-``` r
+```{r}
 cl %>% layout_polygon() %>%
    #tf_rotate(angle = 45, by.each.cross = F) %>%  # If the grouping is 4, rotate by this parameter and change from diamond to square 
    cl_plot(cross = list(mapping = aes(color = type),
@@ -272,7 +281,7 @@ cl %>% layout_polygon() %>%
 
 #### d. layout by hive
 
-``` r
+```{r}
 cl %>% layout_hive(angles=rep(60,6)) %>% #length of angles must be same with the numbers of groups
        cl_plot(cross = list(mapping = aes(color = type),
                        scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
@@ -290,7 +299,7 @@ cl %>% layout_hive(angles=rep(60,6)) %>% #length of angles must be same with the
 
 #### e. layout by arc
 
-``` r
+```{r}
 cl %>% layout_arc(angles=c(60,120,180),crosses=c("D","E","F")) %>% #length of angles must be same with the numbers of crosses
        cl_plot(cross = list(mapping = aes(color = type),
                             scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
@@ -308,7 +317,7 @@ cl %>% layout_arc(angles=c(60,120,180),crosses=c("D","E","F")) %>% #length of an
 
 #### f. layout by combination of several methods
 
-``` r
+```{r}
 
 # demo data
 n <- 5
@@ -343,10 +352,9 @@ cl %>%
 
 ### 2). examples of complex figure
 
-``` r
-
+```{r}
+source("R/data.R")
 library(dplyr)
-library(reshape)
 theme_classic() +
   theme(axis.text = element_blank(),
         axis.line.x = element_blank(),
@@ -354,7 +362,7 @@ theme_classic() +
 
 
 ## crosslink project
-cl <- crosslink(example$nodes,example$edges,cross.by="type")
+cl <- crosslink(nodes,edges,cross.by="type")
 
 cl %>% cl_plot()
 
@@ -376,7 +384,7 @@ topAnn <-  mirData %>%
   ggplot(mapping = aes(x=mir,y=-lfc)) +
   geom_bar(fill = "#E7298A",
            stat = "identity",
-           width = 0.5) + 
+           width = 0.5) + # 间距跟bar同宽
   labs(x = NULL, y = "log2(Fold Change)") +
   theme_use2
 topAnn
@@ -416,7 +424,7 @@ ggplot(data = melt(mat), aes(X1, X2, fill = value))+
           axis.line = element_blank(),
           axis.ticks = element_blank(),
            axis.text = element_blank()) -> lftAnno
-lftAnno
+
 
 cl_plot(cl,
        annotation=cl_annotation(top = topAnn,top.by = "Mir",top.height = 0.5,

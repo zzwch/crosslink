@@ -648,7 +648,7 @@ cl_plot <- function(object, layout = NULL,
         annotation_flag <- annotation_flag + 1
       }else{
         annotation[[paste0(i, ifelse(i %in% c("top", "bottom"), ".height", ".width"))]] <- 0
-        annotation[[i]] <- NULL
+        annotation[[i]] <- plot_spacer()
       }
     }
     if(annotation_flag > 0){

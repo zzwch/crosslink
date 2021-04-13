@@ -282,6 +282,7 @@ tf_fun <- function(
 #' - reflect: x, y, theta (angle from x axis), counterclockwise
 #'
 #' @keywords internal
+#' @export
 #' @examples
 #'
 #' # eigen matrix
@@ -358,6 +359,7 @@ transform_matrix_affine <- function(
 #' g, h, i
 #' )
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' transform_matrix(a = 2, e = 2, i = 2)
@@ -378,6 +380,7 @@ transform_matrix <- function(
 #'
 #' @return a matrix of transformed coordinates
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' # coordinate for a unit square
@@ -417,6 +420,7 @@ transform_by_matrix <- function(x, y = NULL, matrix = transform_matrix_affine("n
 #'
 #' @return a matrix of transformed coordinates
 #' @keywords internal
+#' @export
 #'
 #' @examples
 #' xy <- data.frame(x = 1,
