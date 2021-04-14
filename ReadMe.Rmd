@@ -1,8 +1,8 @@
 ---
 title: "crosslink An R package for network visualization of grouped nodes"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 
