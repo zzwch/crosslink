@@ -12,7 +12,7 @@ You can install the released version of crosslink from [github](https://github.c
 
 ``` r
 
-devtools::install_github("zzwch/crosslinks") 
+devtools::install_github("zzwch/crosslink") 
 library(crosslink)
 
 ```
