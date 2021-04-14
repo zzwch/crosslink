@@ -9,6 +9,11 @@ vignette: >
 
 The goal of crosslink is to visualize the network of grouped nodes
 
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+
 ## 1. Installation
 
 You can install the released version of crosslink from [github](https://github.com/zzwch/crosslink) with:

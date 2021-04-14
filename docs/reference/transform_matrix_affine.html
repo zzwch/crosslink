@@ -108,6 +108,18 @@ reflect: x, y, theta (angle from x axis), counterclockwise
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/vignette.html">vignette</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -200,31 +212,22 @@ reflect: x, y, theta (angle from x axis), counterclockwise
     <pre class="examples"><div class='input'>
 <span class='co'># eigen matrix</span>
 <span class='fu'>transform_matrix_affine</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"none"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;      [,1] [,2] [,3]
-#&gt; [1,]    1    0    0
-#&gt; [2,]    0    1    0
-#&gt; [3,]    0    0    1</div><div class='input'>
+</div><div class='output co'>#&gt; <span class='error'>Error in transform_matrix_affine(type = "none"): 没有"transform_matrix_affine"这个函数</span></div><div class='input'>
 <span class='co'># shift matrix for convert c(0, 0) to c(1, 2)</span>
 <span class='va'>mat</span> <span class='op'>&lt;-</span> <span class='fu'>transform_matrix_affine</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"translate"</span>, x <span class='op'>=</span> <span class='fl'>1</span>, y <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
-<span class='va'>mat</span> <span class='op'>%*%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;      [,1]
-#&gt; [1,]    1
-#&gt; [2,]    2
-#&gt; [3,]    1</div><div class='input'>
+</div><div class='output co'>#&gt; <span class='error'>Error in transform_matrix_affine(type = "translate", x = 1, y = 2): 没有"transform_matrix_affine"这个函数</span></div><div class='input'><span class='va'>mat</span> <span class='op'>%*%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): 找不到对象'mat'</span></div><div class='input'>
 <span class='co'># rotation matrix for convert c(0, 0) to c(0, 2)</span>
 <span class='va'>mat</span> <span class='op'>&lt;-</span> <span class='fu'>transform_matrix_affine</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"rotate"</span>, x <span class='op'>=</span> <span class='fl'>1</span>, y <span class='op'>=</span> <span class='fl'>1</span>, theta <span class='op'>=</span> <span class='va'>pi</span><span class='op'>/</span><span class='fl'>2</span><span class='op'>)</span>
-<span class='va'>mat</span> <span class='op'>%*%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;      [,1]
-#&gt; [1,]    0
-#&gt; [2,]    2
-#&gt; [3,]    1</div><div class='input'>
+</div><div class='output co'>#&gt; <span class='error'>Error in transform_matrix_affine(type = "rotate", x = 1, y = 1, theta = pi/2): 没有"transform_matrix_affine"这个函数</span></div><div class='input'><span class='va'>mat</span> <span class='op'>%*%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): 找不到对象'mat'</span></div><div class='input'>
 <span class='co'># shear for convert c(1, 1) to c(2, 1) if along x or c(1, 2) if along y</span>
 <span class='va'>mat</span> <span class='op'>&lt;-</span> <span class='fu'>transform_matrix_affine</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"shear"</span>, x <span class='op'>=</span> <span class='va'>pi</span><span class='op'>*</span><span class='fl'>45</span><span class='op'>/</span><span class='fl'>180</span>, y <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span>
-<span class='va'>mat</span> <span class='op'>&lt;-</span> <span class='fu'>transform_matrix_affine</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"shear"</span>, x <span class='op'>=</span> <span class='fl'>0</span>, y <span class='op'>=</span> <span class='va'>pi</span><span class='op'>*</span><span class='fl'>45</span><span class='op'>/</span><span class='fl'>180</span>, counterclockwise <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>
-
+</div><div class='output co'>#&gt; <span class='error'>Error in transform_matrix_affine(type = "shear", x = pi * 45/180, y = 0): 没有"transform_matrix_affine"这个函数</span></div><div class='input'><span class='va'>mat</span> <span class='op'>&lt;-</span> <span class='fu'>transform_matrix_affine</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"shear"</span>, x <span class='op'>=</span> <span class='fl'>0</span>, y <span class='op'>=</span> <span class='va'>pi</span><span class='op'>*</span><span class='fl'>45</span><span class='op'>/</span><span class='fl'>180</span>, counterclockwise <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in transform_matrix_affine(type = "shear", x = 0, y = pi * 45/180,     counterclockwise = T): 没有"transform_matrix_affine"这个函数</span></div><div class='input'>
 <span class='co'># reflect for convert c(0, 0) to c(2, 2)</span>
 <span class='va'>mat</span> <span class='op'>&lt;-</span> <span class='fu'>transform_matrix_affine</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"reflect"</span>, x <span class='op'>=</span> <span class='fl'>1</span>, y <span class='op'>=</span> <span class='fl'>1</span>, theta <span class='op'>=</span> <span class='va'>pi</span><span class='op'>*</span><span class='fl'>45</span><span class='op'>/</span><span class='fl'>180</span><span class='op'>)</span>
-
+</div><div class='output co'>#&gt; <span class='error'>Error in transform_matrix_affine(type = "reflect", x = 1, y = 1, theta = pi *     45/180): 没有"transform_matrix_affine"这个函数</span></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

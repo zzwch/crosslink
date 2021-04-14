@@ -86,6 +86,18 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/vignette.html">vignette</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -128,15 +140,15 @@
       <tr>
         
         <td>
-          <p><code><a href="circle_projector.html">circle_projector()</a></code> </p>
-        </td>
-        <td><p>project points to a circle</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="cl_active.html">cl_active()</a></code> <code><a href="cl_active.html">`cl_active&lt;-`()</a></code> </p>
         </td>
         <td><p>Retrieve and Set active layout</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cl_align.html">cl_align()</a></code> </p>
+        </td>
+        <td><p>Align crosses in different layouts</p></td>
       </tr><tr>
         
         <td>
@@ -188,12 +200,6 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="coerce_x_len.html">coerce_x_len()</a></code> </p>
-        </td>
-        <td><p>use a vector repeatedly to generate a new vector of the specified length</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="CrossLink-class.html">CrossLink-class</a></code> </p>
         </td>
         <td><p>The CrossLink class</p></td>
@@ -203,12 +209,6 @@
           <p><code><a href="crosslink.html">crosslink()</a></code> </p>
         </td>
         <td><p>Generator of class CrossLink</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="degree_to_radian.html">degree_to_radian()</a></code> </p>
-        </td>
-        <td><p>convert degree to radian</p></td>
       </tr><tr>
         
         <td>
@@ -236,63 +236,15 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="interval_inclusion.html">interval_inclusion()</a></code> </p>
+          <p><code><a href="layout_column.html">layout_column()</a></code> <code><a href="layout_column.html">layout_row()</a></code> <code><a href="layout_column.html">layout_hive()</a></code> <code><a href="layout_column.html">layout_polygon()</a></code> <code><a href="layout_column.html">layout_arc()</a></code> </p>
         </td>
-        <td><p>get values by interval inclusion</p></td>
+        <td><p>Predefined layouts</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="list_along.html">list_along()</a></code> </p>
         </td>
         <td><p>Create a list along given names and default values</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="merge_list.html">merge_list()</a></code> </p>
-        </td>
-        <td><p>Merge two list</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="nullna_default.html">nullna_default()</a></code> </p>
-        </td>
-        <td><p>a helper function to set default value when inputting NULL or NA</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="override_aes.html">override_aes()</a></code> </p>
-        </td>
-        <td><p>Override default aes with new aes</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="period_arcTrig.html">period_arcTrig()</a></code> </p>
-        </td>
-        <td><p>get arc-trigonometric values in periods</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="period_variable.html">period_variable()</a></code> </p>
-        </td>
-        <td><p>get period variables with same return value</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="Predefined_layouts.html">layout_column()</a></code> <code><a href="Predefined_layouts.html">layout_row()</a></code> <code><a href="Predefined_layouts.html">layout_hive()</a></code> <code><a href="Predefined_layouts.html">layout_polygon()</a></code> <code><a href="Predefined_layouts.html">layout_arc()</a></code> </p>
-        </td>
-        <td><p>Predefined layouts</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="radian_to_degree.html">radian_to_degree()</a></code> </p>
-        </td>
-        <td><p>convert radian to degree</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="segment_range.html">segment_range()</a></code> </p>
-        </td>
-        <td><p>cut a segment defined by a range in 1D coordinate into n pieces</p></td>
       </tr><tr>
         
         <td>
@@ -310,13 +262,7 @@
         <td>
           <p><code><a href="show_aes.html">show_aes()</a></code> </p>
         </td>
-        <td><p>show available aes</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="string_to_circle.html">string_to_circle()</a></code> </p>
-        </td>
-        <td><p>Get its center, radius and angle from a circle's string</p></td>
+        <td><p>show available aesthetic</p></td>
       </tr><tr>
         
         <td>
@@ -328,43 +274,7 @@
         <td>
           <p><code><a href="tf_fun.html">tf_fun()</a></code> </p>
         </td>
-        <td><p>Transformation by given function</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="tolist_by_group.html">tolist_by_group()</a></code> </p>
-        </td>
-        <td><p>convert a vector into a list</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="transform_by_fun.html">transform_by_fun()</a></code> </p>
-        </td>
-        <td><p>Transform 2D coordinates by a function(x, y)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="transform_by_matrix.html">transform_by_matrix()</a></code> </p>
-        </td>
-        <td><p>Transform 2D coordinates by a 3*3 matrix</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="transform_matrix.html">transform_matrix()</a></code> </p>
-        </td>
-        <td><p>a helper function for 3*3 matrix</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="transform_matrix_affine.html">transform_matrix_affine()</a></code> </p>
-        </td>
-        <td><p>generate a 3*3 matrix for affine transformation</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="vector_to_coord.html">vector_to_coord()</a></code> </p>
-        </td>
-        <td><p>convert a vector of characters to a vector of numeric coordinates</p></td>
+        <td><p>Transformation by a given function</p></td>
       </tr>
     </tbody>
     </table>
