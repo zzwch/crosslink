@@ -1,21 +1,23 @@
 ---
-title: "crosslink-vignette"
-output: rmarkdown::html_vignette
-vignette: >
-  % \VignetteIndexEntry{my-vignette}
-  % \VignetteEngine{knitr::rmarkdown}
-  % \VignetteEncoding{UTF-8}
+title: "ReadMe1"
+author: "ld"
+date: "2021/4/14"
+output:
+  pdf_document:
+    keep_tex: yes
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-options(tinytex.verbose = TRUE)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
 ```
 
 The goal of crosslink is to visualize the network of grouped nodes
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
 
 ## 1. Installation
 
@@ -454,3 +456,4 @@ cl_plot(cl,
 
 
 ```
+

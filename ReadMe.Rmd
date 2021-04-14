@@ -1,10 +1,17 @@
 ---
-  title: crosslink An R package for network visualization of grouped nodes
-  output: html_document
+title: "crosslink An R package for network visualization of grouped nodes"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
 The goal of crosslink is to visualize the network of grouped nodes
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
 
 ## 1. Installation
 
