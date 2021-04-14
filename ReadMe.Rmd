@@ -1,8 +1,9 @@
 ---
 title: "crosslink An R package for network visualization of grouped nodes"
 output:
+  pdf_document:
+    latex_engine: xelatex
   html_document: default
-  pdf_document: default
 ---
 
 
