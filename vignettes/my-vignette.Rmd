@@ -2,9 +2,10 @@
 title: "crosslink-vignette"
 output: rmarkdown::html_vignette
 vignette: >
-  % \VignetteIndexEntry{my-vignette}
-  % \VignetteEngine{knitr::rmarkdown}
-  % \VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
 ---
 
 ```{r, include = FALSE}
