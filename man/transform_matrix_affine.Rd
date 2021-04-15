@@ -9,7 +9,8 @@ transform_matrix_affine(
   x = 0,
   y = 0,
   theta = NA,
-  scale = NULL,
+  scale.x = 1,
+  scale.y = 1,
   counterclockwise = FALSE
 )
 }
@@ -22,7 +23,7 @@ transform_matrix_affine(
 
 \item{theta}{transform value of angle in radian, usually in 0 to 2pi}
 
-\item{scale}{scale size, only used for \code{scale} type}
+\item{scale.x, scale.y}{scale size, only used for \code{scale} type}
 
 \item{counterclockwise}{control directions of theta or x,y if type is "shear"}
 }
@@ -42,7 +43,8 @@ a 3*3 matrix
 \itemize{
 \item none: ignore everything
 \item translate: x, y, counterclockwise
-\item scale: x, y, theta, scale
+\item scale: x, y, scale.x, scale.y
+\item scale_xy: x, y
 \item rotate: x, y, theta (angle of the rotation), counterclockwise
 \item shear: x, y, counterclockwise
 \item reflect: x, y, theta (angle from x axis), counterclockwise

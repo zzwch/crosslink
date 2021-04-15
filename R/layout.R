@@ -117,7 +117,8 @@ layout_polygon <- function(object, angles = NULL, crosses = NULL, layout_based =
   object %<>%
     tf_scale(x = coord_top$x, y = coord_top$y,
              #angle = angles_slope,
-             scale = sqrt(2-2*cos(degree_to_radian(angles))),
+             scale.x = sqrt(2-2*cos(degree_to_radian(angles))),
+             scale.y = sqrt(2-2*cos(degree_to_radian(angles))),
              by.each.cross = T,
              relative = F,
              crosses = crosses, layout = "temp")

@@ -16,7 +16,8 @@ tf_affine(
   x = 0,
   y = 0,
   angle = NA,
-  scale = NA,
+  scale.x = NA,
+  scale.y = NA,
   counterclockwise = FALSE,
   relative = T,
   crosses = NULL,
@@ -31,7 +32,7 @@ tf_shift(object, x = 0, y = 0, ...)
 
 tf_shear(object, axis = c("x", "y"), angle = 15, ...)
 
-tf_scale(object, x = 0, y = 0, angle = 90, scale = 1, ...)
+tf_scale(object, x = 0, y = 0, scale.x = 1, scale.y = 1, ...)
 }
 \arguments{
 \item{object}{a CrossLink object}
@@ -40,11 +41,14 @@ tf_scale(object, x = 0, y = 0, angle = 90, scale = 1, ...)
 
 \item{by.each.cross}{transformation to be performed by each cross}
 
-\item{x, y}{scale about this position}
+\item{x, y}{coordiantes of transformation center for \code{tf_rotate};
+offset in x,y axies for \code{tf_shift};
+scale about this position for \code{tf_scale};
+scale \code{x} and \code{y} along x, y axies, respectively, for \code{tf_scale_xy}}
 
 \item{angle}{transformation angle in degree}
 
-\item{scale}{scale size for type \code{scale}}
+\item{scale.x, scale.y}{scale size for type \code{scale}}
 
 \item{counterclockwise}{angle in counterclockwise for transformation}
 
@@ -63,7 +67,7 @@ an updated CrossLink object
 }
 \description{
 Wrapper functions for transformations,
-rotate: \code{tf_rotate}, flip: \code{tf_flip}, shift: \code{tf_shift} shear: \code{tf_shear}, scale: \code{tf_scale}
+rotate: \code{tf_rotate}, flip: \code{tf_flip}, shift: \code{tf_shift} shear: \code{tf_shear}, scale: \code{tf_scale} and \code{tf_scale_xy}
 }
 \details{
 \subsection{learn more about 2D affine and perspective tranformation matrix:}{
@@ -71,17 +75,6 @@ rotate: \code{tf_rotate}, flip: \code{tf_flip}, shift: \code{tf_shift} shear: \c
 \item https://en.wikipedia.org/wiki/Transformation_matrix
 \item https://www.cnblogs.com/bnuvincent/p/6691189.html
 \item \code{Rconic::`Affine planar transformations matrix`}
-}
-}
-
-\subsection{Used arguments for different types:}{
-\itemize{
-\item none: ignore everything
-\item translate: x, y, counterclockwise
-\item scale: x, y, theta, scale (scale about x,y point, scale's unit size is \code{scale*cos(theta), scale*sin(theta)})
-\item rotate: x, y, theta (angle of the rotation), counterclockwise
-\item shear: x, y, counterclockwise
-\item reflect: x, y, theta (angle from x axis), counterclockwise
 }
 }
 }

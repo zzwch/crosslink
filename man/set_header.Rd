@@ -21,12 +21,12 @@ set_header(
 
 \item{hjust, vjust}{a vector for setting x or y position for each header. Repeatedly used if its length less than the length of crosses}
 
-\item{hjust.by.nodes, vjust.by.nodes}{hjust and vjust will be setted based on nodes ranges (wo blanks) or cross ranges (w/ blanks). Repeatedly used.}
+\item{hjust.by.nodes, vjust.by.nodes}{hjust and vjust will be setted based on nodes ranges (w/o blanks) or cross ranges (w/ blanks). Repeatedly used.}
 
 \item{layout}{name of the layout to be retrived or set}
 }
 \value{
-an undated CrossLink object
+an updated CrossLink object
 }
 \description{
 Set Headers for each cross

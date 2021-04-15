@@ -45,7 +45,7 @@ CrossLink <- setClass(
 #' @param nodes a data frame with unique keys in the 1st (settable by \code{key.by}) column and metadata (used for aesthetic of nodes) in the other columns
 #' @param edges a data frame with source and target nodes in the first two (settable by \code{src.by} and \code{tar.by}) columns and other metadata.
 #' @param cross.by the name of a column in \code{nodes}, by which nodes will be grouped into different crosses.
-#' To control the order of crosses and the order of nodes, set factor levels for the corresponding column in \code{nodes}. see \code{\link{factor}} or \code{\link{forcats::fct_relevel}}
+#' To control the order of crosses and the order of nodes, set factor levels for the corresponding column in \code{nodes}. see \code{\link{factor}} or [forcats::fct_relevel()]
 #' @param gaps a numeric vector of n-1 length, n is the number of crosses (that is \code{length(object@cross)}).
 #'  It's a vector of gaps between adjacent crosses.
 #'  set NA or NULL to use equally divided gaps.
@@ -58,6 +58,7 @@ CrossLink <- setClass(
 #' @param src.by name or index of the column in \code{edges} to be used as source of links (edges)
 #' @param tar.by name or index of the column in \code{edges} to be used as target of links (edges)
 #' @param odd.rm remove odd nodes that are not included in edges (without links).
+#' @md
 #'
 #' @return a CrossLink object
 #' @export
@@ -380,9 +381,9 @@ cl_yrange <- function(object, layout = NULL, all = F, crosses = NULL, include.fl
 #' @inheritParams cl_xrange
 #' @param header a vector of titles for all crosses. Its length should be equal with the length of crosses (\code{object@cross}). Set NULL for default using \code{names(object@cross)} and set NA to remove headers.
 #' @param hjust,vjust a vector for setting x or y position for each header. Repeatedly used if its length less than the length of crosses
-#' @param hjust.by.nodes,vjust.by.nodes hjust and vjust will be setted based on nodes ranges (wo blanks) or cross ranges (w/ blanks). Repeatedly used.
+#' @param hjust.by.nodes,vjust.by.nodes hjust and vjust will be setted based on nodes ranges (w/o blanks) or cross ranges (w/ blanks). Repeatedly used.
 #'
-#' @return an undated CrossLink object
+#' @return an updated CrossLink object
 #' @export
 #'
 #' @examples
@@ -496,8 +497,11 @@ get_link <- function(object, layout = NULL){
   cross_coord <- cross_coord[cross_coord[["node.type"]] == "node",,drop = F]
 
   link_data <- object@edges
+  node_data <- object@nodes
   link_data$source <- link_data[[object@params$src.by]]
   link_data$target <- link_data[[object@params$tar.by]]
+  link_data$src.degree <- node_data$degree[match(link_data$source, node_data[[cl@params$key.by]])]
+  link_data$tar.degree <- node_data$degree[match(link_data$target, node_data[[cl@params$key.by]])]
   link_data[c("x", "y")] <- cross_coord[match(link_data$source, cross_coord$node), c("x", "y")]
   link_data[c("xend", "yend")]<- cross_coord[match(link_data$target, cross_coord$node), c("x", "y")]
   return(link_data)
@@ -597,18 +601,18 @@ cl_plot <- function(object, layout = NULL,
   # cross
   p <- p_layer(p,
                cross, data_fun = get_cross,
-               default_aes = aes(x = x, y = y, size = degree),
+               default_aes = aes(x = x, y = y, size = degree, color = cross),
                default_geom = "point")
   # label
   p <- p_layer(p,
                label, data_fun = get_cross,
-               default_aes = aes_string(x = "x", y = "y", label = object@params$key.by, color = "cross"),
+               default_aes = aes_string(x = "x", y = "y", label = object@params$key.by),
                default_geom = "text")
   # header
   if(!identical(suppressWarnings(get_header(object, layout)), NA)){
     p <- p_layer(p,
                  header, data_fun = get_header,
-                 default_aes = aes(x = x, y = y, label = header, color = cross),
+                 default_aes = aes(x = x, y = y, label = header),
                  default_geom = "text", default_param = list(fontface = "bold"))
   }
 
@@ -867,42 +871,40 @@ cl_align <- function(object, crosses.1, crosses.2, align.x = F, align.y = F, anc
   tf_shift(object, x = xshift, y = yshift, crosses = crosses.2, relative = F, layout = layout)
 }
 
-#
-# pl_crosslink(
-#   cl,
-#   cross = list(mapping = aes(x, y, color = color, size = size)),
-#   link = list(mapping = aes(x, y, xend = xend, yend = yend),
-#                    color = "grey90"),
-#   header = list(mapping = aes(x,y , label = header)),
-#   label = list(mapping = aes(x,y, label = node))
-#   )
-#
-# cl <- CrossLink(
-#   nodes %>% mutate(type = factor(type, unique(type))),
-#   edges, cross.by = "type", cross.header = NULL, cross.header.pos = c(0, 0.5),
-#   xrange = c(0, 7), yrange = c(0, 11))
-#
-# cl %<>% tf_rotate()
-# cl %<>% set_header()
-# tmp1 <- get_link(cl)
-# tmp2 <- get_link(cl)
-# tmp2$x <- tmp2$xend
-# tmp2$y <- tmp2$yend
-# tmp <- rbind(tmp1, tmp2)
-# tmp$group <- rep(1:nrow(tmp1), 2)
-# ggplot() +
-#   # geom_diagonal0(mapping = aes(x, y, xend = xend, yend = yend),
-#   #                color = "grey",
-#   #                data = get_link(cl)) +
-#   geom_diagonal2(mapping = aes(x, y,group = group, color = as.character(y)),
-#                  data = tmp) +
-#   ggnewscale::new_scale_color() +
-#   geom_point(mapping = aes(x, y, color = color, size = size),
-#              data = get_cross(cl)) +
-#   scale_color_manual(values = unique(cl@nodes$color)) +
-#   # geom_text(mapping = aes(x,y , label = header),
-#   #           data = get_header(cl, y.by.each.cross = T)) +
-#   xlim(cl_xrange(cl)) + ylim(cl_yrange(cl))# +  theme_void()
-
-
-# Set Header should be the last
+#' a theme for crosslink plot
+#'
+#' @param gg a ggplot object
+#' @param th a value returned by theme()
+#'
+#' @return an updated ggplot object
+#' @export
+#'
+#' @examples
+#'
+cl_void <- function(gg, th = theme()) {
+  base_size <- 11
+  half_line <- base_size/2
+  gg + theme(line = element_blank(), rect = element_blank(),
+             text = element_text(family = "", face = "plain",
+                                 colour = "black", size = base_size, lineheight = 0.9,
+                                 hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(),
+                                 debug = FALSE), axis.text = element_blank(), axis.title = element_blank(),
+             axis.ticks.length = unit(0, "pt"), axis.ticks.length.x = NULL,
+             axis.ticks.length.x.top = NULL, axis.ticks.length.x.bottom = NULL,
+             axis.ticks.length.y = NULL, axis.ticks.length.y.left = NULL,
+             axis.ticks.length.y.right = NULL, legend.box = NULL,
+             legend.key.size = unit(1.2, "lines"), legend.position = "right",
+             legend.text = element_text(size = rel(0.8)), legend.title = element_text(hjust = 0),
+             strip.text = element_text(size = rel(0.8)), strip.switch.pad.grid = unit(half_line/2,
+                                                                                      "pt"), strip.switch.pad.wrap = unit(half_line/2,
+                                                                                                                          "pt"), panel.ontop = FALSE, panel.spacing = unit(half_line,
+                                                                                                                                                                           "pt"), plot.margin = unit(c(0, 0, 0, 0), "lines"),
+             plot.title = element_text(size = rel(1.2), hjust = 0,
+                                       vjust = 1, margin = margin(t = half_line)), plot.title.position = "panel",
+             plot.subtitle = element_text(hjust = 0, vjust = 1, margin = margin(t = half_line)),
+             plot.caption = element_text(size = rel(0.8), hjust = 1,
+                                         vjust = 1, margin = margin(t = half_line)), plot.caption.position = "panel",
+             plot.tag = element_text(size = rel(1.2), hjust = 0.5,
+                                     vjust = 0.5), plot.tag.position = "topleft",
+             complete = TRUE) + th
+}

@@ -1,14 +1,17 @@
 #' Affine Transformation
 #'
 #' Wrapper functions for transformations,
-#' rotate: \code{tf_rotate}, flip: \code{tf_flip}, shift: \code{tf_shift} shear: \code{tf_shear}, scale: \code{tf_scale}
+#' rotate: \code{tf_rotate}, flip: \code{tf_flip}, shift: \code{tf_shift} shear: \code{tf_shear}, scale: \code{tf_scale} and \code{tf_scale_xy}
 #'
 #' @param object a CrossLink object
 #' @param type affine type
 #' @param by.each.cross transformation to be performed by each cross
-#' @param x,y coordiantes of transformation center, or angle in radian for \code{shear}
+#' @param x,y coordiantes of transformation center for `tf_rotate`;
+#' offset in x,y axies for `tf_shift`;
+#' scale about this position for `tf_scale`;
+#' scale `x` and `y` along x, y axies, respectively, for `tf_scale_xy`
 #' @param angle transformation angle in degree
-#' @param scale scale size for type \code{scale}
+#' @param scale.x,scale.y scale size for type \code{scale}
 #' @param counterclockwise angle in counterclockwise for transformation
 #' @param relative x,y is relative coordinates in range c(0,1)
 #' @param crosses only these crosses will be transformed
@@ -22,14 +25,6 @@
 #' - https://www.cnblogs.com/bnuvincent/p/6691189.html
 #' - \code{Rconic::`Affine planar transformations matrix`}
 #'
-#' ## Used arguments for different types:
-#' - none: ignore everything
-#' - translate: x, y, counterclockwise
-#' - scale: x, y, theta, scale (scale about x,y point, scale's unit size is \code{scale*cos(theta), scale*sin(theta)})
-#' - rotate: x, y, theta (angle of the rotation), counterclockwise
-#' - shear: x, y, counterclockwise
-#' - reflect: x, y, theta (angle from x axis), counterclockwise
-#'
 #' @md
 #' @return an updated CrossLink object
 #' @export
@@ -41,7 +36,8 @@ tf_affine <- function(
   object,
   type = c("none", "translate", "scale", "rotate", "shear", "reflect"),
   by.each.cross = F,
-  x = 0, y = 0, angle = NA, scale = NA, counterclockwise = FALSE,
+  x = 0, y = 0, angle = NA, scale.x = NA, scale.y = NA,
+  counterclockwise = FALSE,
   relative = T,
   crosses = NULL, # tf these crosses (names)
   layout = "transforming"
@@ -58,7 +54,8 @@ tf_affine <- function(
     n_cross <- length(crosses)
     x <- coerce_x_len(x, n_cross)
     y <- coerce_x_len(y, n_cross)
-    scale <- coerce_x_len(scale, n_cross)
+    scale.x <- coerce_x_len(scale.x, n_cross)
+    scale.y <- coerce_x_len(scale.y, n_cross)
 
     if(relative){
       xy <- cl_rel2abs(object, x, y, crosses, by.canvas = F)
@@ -79,7 +76,8 @@ tf_affine <- function(
         coord_i,
         matrix = transform_matrix_affine(
           type = type,
-          x = x[[i]], y = y[[i]], theta = theta[[i]], scale = scale[[i]],
+          x = x[[i]], y = y[[i]], theta = theta[[i]],
+          scale.x = scale.x[[i]], scale.y = scale.y[[i]],
           counterclockwise = counterclockwise[[i]]))
     }
   }else{
@@ -96,7 +94,8 @@ tf_affine <- function(
       coord[ind, c("x", "y")],
       matrix = transform_matrix_affine(
         type = type,
-        x = x[[1]], y = y[[1]], theta = theta[[1]], scale = scale[[1]],
+        x = x[[1]], y = y[[1]], theta = theta[[1]],
+        scale.x = scale.x[[1]], scale.y = scale.y[[1]],
         counterclockwise = counterclockwise[[1]]))
 
   }
@@ -173,17 +172,17 @@ tf_shear <- function(
 
 #' @export
 #' @rdname tf_affine
-#' @param x,y scale about this position
 #'
 tf_scale <- function(
-  object, x = 0, y = 0, angle = 90, scale = 1,
+  object, x = 0, y = 0, scale.x = 1, scale.y = 1,
   ...) {
 
   tf_affine(
-    object, type = c("scale"), x = x, y = y, angle = angle, scale = scale,
+    object, type = c("scale"), x = x, y = y, scale.x = scale.x, scale.y = scale.y,
     ...)
 
 }
+
 
 #' Transformation by a given function
 #'
@@ -263,7 +262,7 @@ tf_fun <- function(
 #' @param y transform value along y axis
 #' @param theta transform value of angle in radian, usually in 0 to 2pi
 #' @param counterclockwise control directions of theta or x,y if type is "shear"
-#' @param scale scale size, only used for \code{scale} type
+#' @param scale.x,scale.y scale size, only used for \code{scale} type
 #'
 #' @return a 3*3 matrix
 #' @md
@@ -276,7 +275,8 @@ tf_fun <- function(
 #' ## Used arguments for different types:
 #' - none: ignore everything
 #' - translate: x, y, counterclockwise
-#' - scale: x, y, theta, scale
+#' - scale: x, y, scale.x, scale.y
+#' - scale_xy: x, y
 #' - rotate: x, y, theta (angle of the rotation), counterclockwise
 #' - shear: x, y, counterclockwise
 #' - reflect: x, y, theta (angle from x axis), counterclockwise
@@ -305,17 +305,17 @@ tf_fun <- function(
 #'
 transform_matrix_affine <- function(
   type = c("none", "translate", "scale", "rotate", "shear", "reflect"),
-  x = 0, y = 0, theta = NA, scale = NULL, counterclockwise = FALSE){
+  x = 0, y = 0, theta = NA, scale.x = 1, scale.y = 1, counterclockwise = FALSE){
 
   if(counterclockwise && type != "scale") theta <- -theta
   switch(
     match.arg(arg = type, several.ok = FALSE),
     none = transform_matrix(),
     translate = transform_matrix(c = x, f = y),
-    scale = transform_matrix(a = scale,
-                             c = x-x*scale,
-                             e = scale,
-                             f = y-y*scale),
+    scale = transform_matrix(a = scale.x,
+                             c = x-x*scale.x,
+                             e = scale.y,
+                             f = y-y*scale.y),
     rotate = {
       if(!is.numeric(theta)) stop("parameter theta must be numeric for ROTATE!")
       transform_matrix(c = x, f = y) %*%

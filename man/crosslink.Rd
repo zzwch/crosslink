@@ -24,7 +24,7 @@ crosslink(
 \item{edges}{a data frame with source and target nodes in the first two (settable by \code{src.by} and \code{tar.by}) columns and other metadata.}
 
 \item{cross.by}{the name of a column in \code{nodes}, by which nodes will be grouped into different crosses.
-To control the order of crosses and the order of nodes, set factor levels for the corresponding column in \code{nodes}. see \code{\link{factor}} or \code{\link{forcats::fct_relevel}}}
+To control the order of crosses and the order of nodes, set factor levels for the corresponding column in \code{nodes}. see \code{\link{factor}} or \code{\link[forcats:fct_relevel]{forcats::fct_relevel()}}}
 
 \item{gaps}{a numeric vector of n-1 length, n is the number of crosses (that is \code{length(object@cross)}).
 It's a vector of gaps between adjacent crosses.
