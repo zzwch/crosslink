@@ -41,7 +41,7 @@
 
 <meta property="og:title" content="Affine Transformation — tf_affine" />
 <meta property="og:description" content="Wrapper functions for transformations,
-rotate: tf_rotate, flip: tf_flip, shift: tf_shift shear: tf_shear, scale: tf_scale" />
+rotate: tf_rotate, flip: tf_flip, shift: tf_shift shear: tf_shear, scale: tf_scale and tf_scale_xy" />
 
 
 
@@ -96,7 +96,7 @@ rotate: tf_rotate, flip: tf_flip, shift: tf_shift shear: tf_shear, scale: tf_sca
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/vignette.html">vignette</a>
+      <a href="../articles/vignette.html">crosslink</a>
     </li>
   </ul>
 </li>
@@ -123,7 +123,7 @@ rotate: tf_rotate, flip: tf_flip, shift: tf_shift shear: tf_shear, scale: tf_sca
 
     <div class="ref-description">
     <p>Wrapper functions for transformations,
-rotate: <code>tf_rotate</code>, flip: <code>tf_flip</code>, shift: <code>tf_shift</code> shear: <code>tf_shear</code>, scale: <code>tf_scale</code></p>
+rotate: <code>tf_rotate</code>, flip: <code>tf_flip</code>, shift: <code>tf_shift</code> shear: <code>tf_shear</code>, scale: <code>tf_scale</code> and <code>tf_scale_xy</code></p>
     </div>
 
     <pre class="usage"><span class='fu'>tf_affine</span><span class='op'>(</span>
@@ -133,7 +133,8 @@ rotate: <code>tf_rotate</code>, flip: <code>tf_flip</code>, shift: <code>tf_shif
   x <span class='op'>=</span> <span class='fl'>0</span>,
   y <span class='op'>=</span> <span class='fl'>0</span>,
   angle <span class='op'>=</span> <span class='cn'>NA</span>,
-  scale <span class='op'>=</span> <span class='cn'>NA</span>,
+  scale.x <span class='op'>=</span> <span class='cn'>NA</span>,
+  scale.y <span class='op'>=</span> <span class='cn'>NA</span>,
   counterclockwise <span class='op'>=</span> <span class='cn'>FALSE</span>,
   relative <span class='op'>=</span> <span class='cn'>T</span>,
   crosses <span class='op'>=</span> <span class='cn'>NULL</span>,
@@ -148,7 +149,7 @@ rotate: <code>tf_rotate</code>, flip: <code>tf_flip</code>, shift: <code>tf_shif
 
 <span class='fu'>tf_shear</span><span class='op'>(</span><span class='va'>object</span>, axis <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"x"</span>, <span class='st'>"y"</span><span class='op'>)</span>, angle <span class='op'>=</span> <span class='fl'>15</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>tf_scale</span><span class='op'>(</span><span class='va'>object</span>, x <span class='op'>=</span> <span class='fl'>0</span>, y <span class='op'>=</span> <span class='fl'>0</span>, angle <span class='op'>=</span> <span class='fl'>90</span>, scale <span class='op'>=</span> <span class='fl'>1</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+<span class='fu'>tf_scale</span><span class='op'>(</span><span class='va'>object</span>, x <span class='op'>=</span> <span class='fl'>0</span>, y <span class='op'>=</span> <span class='fl'>0</span>, scale.x <span class='op'>=</span> <span class='fl'>1</span>, scale.y <span class='op'>=</span> <span class='fl'>1</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -167,14 +168,17 @@ rotate: <code>tf_rotate</code>, flip: <code>tf_flip</code>, shift: <code>tf_shif
     </tr>
     <tr>
       <th>x, y</th>
-      <td><p>scale about this position</p></td>
+      <td><p>coordiantes of transformation center for <code>tf_rotate</code>;
+offset in x,y axies for <code>tf_shift</code>;
+scale about this position for <code>tf_scale</code>;
+scale <code>x</code> and <code>y</code> along x, y axies, respectively, for <code>tf_scale_xy</code></p></td>
     </tr>
     <tr>
       <th>angle</th>
       <td><p>transformation angle in degree</p></td>
     </tr>
     <tr>
-      <th>scale</th>
+      <th>scale.x, scale.y</th>
       <td><p>scale size for type <code>scale</code></p></td>
     </tr>
     <tr>
@@ -215,18 +219,6 @@ rotate: <code>tf_rotate</code>, flip: <code>tf_flip</code>, shift: <code>tf_shif
 <li><p>https://en.wikipedia.org/wiki/Transformation_matrix</p></li>
 <li><p>https://www.cnblogs.com/bnuvincent/p/6691189.html</p></li>
 <li><p><code>Rconic::`Affine planar transformations matrix`</code></p></li>
-</ul>
-
-
-<h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Used arguments for different types:</h3>
-
-<ul>
-<li><p>none: ignore everything</p></li>
-<li><p>translate: x, y, counterclockwise</p></li>
-<li><p>scale: x, y, theta, scale (scale about x,y point, scale's unit size is <code>scale*cos(theta), scale*sin(theta)</code>)</p></li>
-<li><p>rotate: x, y, theta (angle of the rotation), counterclockwise</p></li>
-<li><p>shear: x, y, counterclockwise</p></li>
-<li><p>reflect: x, y, theta (angle from x axis), counterclockwise</p></li>
 </ul>
 
 

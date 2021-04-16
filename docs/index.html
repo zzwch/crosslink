@@ -57,7 +57,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/vignette.html">vignette</a>
+      <a href="articles/vignette.html">crosslink</a>
     </li>
   </ul>
 </li>
@@ -74,29 +74,45 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
+
 <div id="crosslink" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#crosslink" class="anchor"></a>crosslink</h1></div>
-<!-- badges: start -->
-<!-- badges: end -->
+<p>Network Visualization Tailed for Grouped Nodes</p>
+</div>
+<div id="an-r-package-for-network-visualization-of-grouped-nodes" class="section level1">
+<h1 class="hasAnchor">
+<a href="#an-r-package-for-network-visualization-of-grouped-nodes" class="anchor"></a>An R package for network visualization of grouped nodes</h1>
 <p>The goal of crosslink is to visualize the network of grouped nodes</p>
 <div id="1-installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#1-installation" class="anchor"></a>1. Installation</h2>
 <p>You can install the released version of crosslink from <a href="https://github.com/zzwch/crosslink">github</a> with:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">"zzwch/crosslink"</span><span class="op">)</span> 
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">crosslink</span><span class="op">)</span></code></pre></div>
+<pre><code><a href="https://remotes.r-lib.org/reference/install_github.html">remotes::install_github("zzwch/crosslink", build_vignettes = TRUE)
+</a></code></pre>
+<p>Or download the compressed file <a href="https://codeload.github.com/zzwch/crosslink/zip/refs/heads/master">Link</a>, then run</p>
+<pre><code><a href="https://remotes.r-lib.org/reference/install_local.html">remotes::install_local(path = "./crosslink-master.zip", build_vignettes = TRUE)
+</a></code></pre>
 </div>
 <div id="2-quick-start" class="section level2">
 <h2 class="hasAnchor">
 <a href="#2-quick-start" class="anchor"></a>2. Quick start</h2>
-<p>Examples of typical crosslonk usage.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/crosslink.html">crosslink</a></span><span class="op">(</span><span class="va">demo</span><span class="op">$</span><span class="va">nodes</span>, <span class="va">demo</span><span class="op">$</span><span class="va">edges</span>, <span class="va">demo</span><span class="op">$</span><span class="va">cross.by</span>, odd.rm <span class="op">=</span> <span class="cn">F</span>,spaces <span class="op">=</span> <span class="st">"flank"</span><span class="op">)</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p>Examples of typical crosslink usage.</p>
+<pre><code><a href="https://rdrr.io/r/base/library.html">library(crosslink)
+
+# generate a CrossLink object
+cl &lt;- crosslink(demo$nodes, demo$edges, demo$cross.by, odd.rm = F,spaces = "flank")
+
+# set headers if needed
+cl %&lt;&gt;% set_header(header = c("A","B","C","D","E","F"))
+
+# plot the network
+
+# By default, node color is coded and node size is proportional to its degree (calculated internally).
+# And edge color is coded by the cross group of the edge's source node.
+cl %&gt;% cl_plot()
+</a></code></pre>
+<p>Users can also custom the aesthetics for node, edge, label and header by using cl_plot, which wrapped multiple ggplot2::geom_* functions in one interface. Please see below (Plotting modules) for more details.</p>
 </div>
 <div id="3-step-by-step" class="section level2">
 <h2 class="hasAnchor">
@@ -108,392 +124,436 @@
 <p>crosslink needs two files as input.</p>
 <p>a. nodes (must have two columns: node name and node type)</p>
 <p>b. edges data (must have two columns: source node and target node).</p>
-<p>crosslink also provides the function ‘gen_demo’ to generate demo data.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="co"># generate demo data</span>
-<span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">6</span>
-<span class="va">demo</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gen_demo.html">gen_demo</a></span><span class="op">(</span>n_cross <span class="op">=</span> <span class="va">n</span>,n_node <span class="op">=</span> <span class="fl">4</span><span class="op">:</span><span class="op">(</span><span class="va">n</span><span class="op">+</span><span class="fl">3</span><span class="op">)</span>, n_link <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="op">(</span><span class="va">n</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">66</span><span class="op">)</span>
-<span class="va">nodes</span> <span class="op">&lt;-</span> <span class="va">demo</span><span class="op">$</span><span class="va">nodes</span>
-<span class="va">edges</span> <span class="op">&lt;-</span> <span class="va">demo</span><span class="op">$</span><span class="va">edges</span>
-<span class="va">cross.by</span> <span class="op">&lt;-</span> <span class="va">demo</span><span class="op">$</span><span class="va">cross.by</span></code></pre></div>
+<p>Here, crosslink uses the function ‘gen_demo’ to generate demo data.</p>
+<pre><code>n &lt;- 6
+demo &lt;- gen_demo(n_cross = n,n_node = 4:(n+3), n_link = 3:(n+1), seed = 66)
+nodes &lt;- demo$nodes
+edges &lt;- demo$edges
+cross.by &lt;- demo$cross.by</code></pre>
 </div>
 <div id="2-generate-crosslink-class" class="section level3">
 <h3 class="hasAnchor">
 <a href="#2-generate-crosslink-class" class="anchor"></a>2). Generate crossLink class</h3>
-<p>crosslink can help to generate an object of crosslink class for plot.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># users can define 'odd.rm' to choose if remove the nodes have zero relationship with any other nodes when generate crosslink class</span>
-<span class="co"># user can set intervals between nodes and gaps through spaces and gaps.</span>
-<span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/crosslink.html">crosslink</a></span><span class="op">(</span><span class="va">nodes</span>, <span class="va">edges</span>, <span class="va">cross.by</span>, odd.rm <span class="op">=</span> <span class="cn">F</span>,spaces <span class="op">=</span> <span class="st">"flank"</span><span class="op">)</span>
+<p>crosslink can generate an object of crosslink class for plot.</p>
+<pre><code># users can define 'odd.rm' to choose if remove the nodes have zero relationship with any other nodes when generate crosslink class
+# user can set intervals between nodes and gaps through spaces and gaps.
+cl &lt;- crosslink(nodes, edges, cross.by, odd.rm = F,spaces = "flank")
 
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/get_cross.html">get_cross</a></span><span class="op">(</span><span class="op">)</span>   <span class="co"># get node information</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/get_link.html">get_link</a></span><span class="op">(</span><span class="op">)</span>    <span class="co"># get edges information</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_layouts.html">cl_layouts</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># get layouts information of crosslink object</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_active.html">cl_active</a></span><span class="op">(</span><span class="op">)</span>   <span class="co"># get active layouts information of crosslink object</span></code></pre></div>
+# Header can be customized through 'set_header'
+cl %&lt;&gt;% set_header(header = c("A","B","C","D","E","F"))</code></pre>
 </div>
 <div id="3-coordinate-transformation" class="section level3">
 <h3 class="hasAnchor">
 <a href="#3-coordinate-transformation" class="anchor"></a>3). Coordinate transformation</h3>
+<p>The <code>default</code> layout is initialized by <code>crosslink</code> function.</p>
+<pre><code>cl %&gt;% cl_active() # get currrently active layout information of a CrossLink object</code></pre>
+<p>And, currently active layout will be based on for transforming coordinates. You can set another layout as active layout. All available layouts can be listed. See <code>layout modules</code> to set more layouts.</p>
+<pre><code>cl %&gt;% cl_layouts()  # get all available layouts in a CrossLink object
+cl_active(cl) &lt;- "default" # set your favorate layout </code></pre>
 <p>Coordinate transformation consists of affine transformation and functional transformation. The <code>tf_affine</code> function contains <code>tf_rotate</code>, <code>tf_shift</code>, <code>tf_shear</code>, <code>tf_flip</code> and <code>tf_scale</code> function. The <code>tf_fun</code> interface allows user to custom transforming function.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="co"># tf_rotate, rotating in a specific angle with (x,y) as the center.</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/tf_affine.html">tf_rotate</a></span><span class="op">(</span>x<span class="op">=</span><span class="fl">0</span>,y<span class="op">=</span><span class="fl">1</span>,angle <span class="op">=</span> <span class="fl">45</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># tf_shift, shifting a relative distance according to x-axis or y-axis</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/tf_affine.html">tf_shift</a></span><span class="op">(</span>x<span class="op">=</span><span class="fl">1</span>,y<span class="op">=</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># tf_shear</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/tf_affine.html">tf_shear</a></span><span class="op">(</span>axis <span class="op">=</span> <span class="st">"x"</span>,angle <span class="op">=</span> <span class="fl">60</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># tf_flip, flip the figure according to x-axis or y-axis</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/tf_affine.html">tf_flip</a></span><span class="op">(</span>axis <span class="op">=</span> <span class="st">"y"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># tf_scale</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/tf_affine.html">tf_scale</a></span><span class="op">(</span>x<span class="op">=</span><span class="fl">0</span>,y<span class="op">=</span><span class="fl">1</span>,scale <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span> 
-
-<span class="co"># tf_fun, coordinate transformation according to custom-defined function</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/tf_fun.html">tf_fun</a></span><span class="op">(</span>fun <span class="op">=</span> <span class="va">sin</span>,along <span class="op">=</span> <span class="st">"y"</span>,xrange.from<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0.5</span><span class="op">*</span><span class="va">pi</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># combined tf functions</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/tf_affine.html">tf_flip</a></span><span class="op">(</span>axis <span class="op">=</span> <span class="st">"y"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/tf_fun.html">tf_fun</a></span><span class="op">(</span>fun <span class="op">=</span> <span class="va">sin</span>,along <span class="op">=</span> <span class="st">"y"</span>,xrange.from<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0.5</span><span class="op">*</span><span class="va">pi</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><strong>Note</strong> : The active layout before transformation will be based on to perform transforming, and the transformed coordinates will be stored in ‘transforming’ layout (Default, set <code>layout</code> to change it, and a novel layout is permitted.).</p>
+<pre><code># tf_rotate, rotating in a specific angle with (x,y) as the center.
+cl %&gt;% tf_rotate(x=0,y=1,angle = 45) %&gt;% cl_plot()
+# tf_shift, shifting a relative distance according to x-axis or y-axis
+cl %&gt;% tf_shift(x=1,y=-1) %&gt;% cl_plot()
+# tf_shear
+cl %&gt;% tf_shear(axis = "x",angle = 60) %&gt;% cl_plot()
+# tf_flip, flip the figure according to x-axis or y-axis
+cl %&gt;% tf_flip(axis = "y") %&gt;% cl_plot()
+# tf_scale
+cl %&gt;% tf_scale(x=0, y=1, scale.x = 5, scale.y = 5) %&gt;% cl_plot() 
+# tf_fun, coordinate transformation according to custom-defined function
+cl %&gt;% tf_fun(fun = sin,along = "y",xrange.from=c(0,0.5*pi)) %&gt;% cl_plot()
+# combined transformation functions
+cl %&gt;% tf_flip(axis = "y") %&gt;% tf_fun(fun = sin,along = "y",xrange.from=c(0,0.5*pi)) %&gt;% cl_plot()</code></pre>
 </div>
 <div id="4-layout-modules" class="section level3">
 <h3 class="hasAnchor">
 <a href="#4-layout-modules" class="anchor"></a>4). Layout modules</h3>
-<p>a. Commonly used styles are predefined in layout module, including row, column, arc, polygon and hive. crosses can be specified in all five layout module</p>
-<p>b. ‘set_header’ function is provided to conveniently place cross headers</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># default layout module is column</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/layout_column.html">layout_column</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># layout by row</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/layout_column.html">layout_row</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># layout by arc</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/layout_column.html">layout_arc</a></span><span class="op">(</span>angles <span class="op">=</span> <span class="fl">60</span>,crosses <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"E"</span>,<span class="st">"F"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># layout by polygon (list of angles must have the same length with crosses)</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/layout_column.html">layout_polygon</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># layout by hive</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/layout_column.html">layout_hive</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># Header can be customized through 'set_header'</span>
-<span class="fu"><a href="reference/set_header.html">set_header</a></span><span class="op">(</span><span class="va">cl</span>,header <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span>,<span class="st">"E"</span>,<span class="st">"F"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">cl</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/get_header.html">get_header</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># get header of crosslink object </span></code></pre></div>
+<p>Different layout styles can be stored in a CrossLink object.</p>
+<p>Because ‘default’ layout is routinely used as base layout for the layout module, it is strongly recommended not to override the ‘default’ layout (<strong>Important</strong>), unless you have known the transformation and layout modules well!</p>
+<p>Several commonly used layout styles are predefined, including row, column, arc, polygon and hive. And crosses can be placed in one or multiple layouts.</p>
+<p><strong>Note</strong> : The ‘set_header’ function can be called to conveniently place headers after layouting.</p>
+<pre><code># The 'default' layout is actually column. 
+cl %&gt;% cl_plot()
+# layout by column
+cl %&gt;% layout_column(layout_save = "column") %&gt;% cl_plot()
+# layout by row
+cl %&gt;% layout_row(layout_save = "row") %&gt;% cl_plot()
+# layout by arc, set header after transformation
+cl %&gt;% layout_arc(angles = 60,crosses = c("E","F"), layout_save = "arc") %&gt;% set_header(hjust = 0.5, vjust = 1)%&gt;% cl_plot()
+# layout by polygon (list of angles must have the same length with crosses)
+cl %&gt;% layout_polygon(layout_save = "polygon") %&gt;% cl_plot()
+# layout by hive
+cl %&gt;% layout_hive(layout_save = "hive") %&gt;% cl_plot()</code></pre>
 </div>
 <div id="5-plotting-modules" class="section level3">
 <h3 class="hasAnchor">
 <a href="#5-plotting-modules" class="anchor"></a>5). Plotting modules</h3>
-<p>We introduce this pattern in three aspects.</p>
+<p>We introduce this wrapper function <code>cl_plot</code> in three steps.</p>
 <p>a. quick plotting (<code>cl_plot</code>)</p>
 <p>b. aesthetic settings ( The color, size, type and text of the nodes and lines in the network)</p>
-<p>c. combination of the network diagram with the corresponding node annotation image in aligning coordinates</p>
+<p>c. combination of the network diagram with the corresponding node annotation graph in aligning coordinates</p>
 <div id="a-quick-plotting" class="section level4">
 <h4 class="hasAnchor">
 <a href="#a-quick-plotting" class="anchor"></a>a. quick plotting</h4>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code>cl %&gt;% cl_plot()</code></pre>
 </div>
 <div id="b-aesthetic-settings" class="section level4">
 <h4 class="hasAnchor">
 <a href="#b-aesthetic-settings" class="anchor"></a>b. aesthetic settings</h4>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># aesthetic settings based on ggplot2 system, some specific examples are shown below.</span>
+<pre><code># aesthetic settings based on ggplot2 system, some specific examples are shown below.
 
-<span class="co"># set colors, shapes and size of nodes</span>
-<span class="co"># cross:a named list of arguments for crosses. usage same as ggplot2::geom_point(). Set NULL to use default settings, or Set NA to not show.</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span>cross <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span>  <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">type</span>,shape<span class="op">=</span> <span class="va">type</span>,size<span class="op">=</span><span class="va">type</span><span class="op">)</span>,
-                            scale   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Set1"</span><span class="op">)</span><span class="op">)</span>,
-                                           size  <span class="op">=</span> <span class="fu">scale_size_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">12</span>,by<span class="op">=</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,
-                                           shape  <span class="op">=</span> <span class="fu">scale_shape_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">15</span><span class="op">:</span><span class="fl">22</span><span class="op">)</span><span class="op">)</span>
-                                          <span class="op">)</span>
-                           <span class="op">)</span><span class="op">)</span>
+# show available variables for aesthetic setting
+cl %&gt;% show_aes()</code></pre>
+<pre><code># set colors, shapes and size of nodes
+# cross:a named list of arguments for crosses. usage same as ggplot2::geom_point(). Set NULL to use default settings, or Set NA to not show.
+cl %&gt;% cl_plot(cross = list(mapping =  aes(color = type, shape= type),
+                            scale   = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(6, "Dark2"),
+                                                                      guide = guide_legend(ncol = 2)),
+                                           size  = scale_size_continuous(range = c(1,5), 
+                                                                      guide = guide_legend(ncol = 2)),
+                                           shape  = scale_shape_manual(values = c(13:18),
+                                                                      guide = guide_legend(ncol = 2))
+                                          )
+                           ))</code></pre>
+<pre><code># set colors, linetypes and size of edges
+# link: a named list of arguments for links. usage same as ggplot2::geom_segment(). Set NULL to use default settings, or Set NA to not show.
+cl %&gt;% cl_plot(link = list(mapping =  aes(color = src.cross, linetype =src.cross, size = src.degree),
+                           scale   = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(5, "Dark2"),
+                                                                    guide = guide_legend(ncol = 2)),
+                                          size  = scale_size_continuous(range = c(1,3), 
+                                                                      guide = guide_legend(ncol = 2)),
+                                          linetype = scale_linetype_manual(values = c(1:6),
+                                                                    guide = guide_legend(ncol = 2))
+                                         )
+                          ),
+               cross = list(show.legend = F) # disable cross's legends
+               )</code></pre>
+<pre><code># set header styles
+# header:   a named list of arguments for headers. usage same as ggplot2::geom_text(). Set NULL to use default settings, or Set NA to not show.
+cl %&gt;% cl_plot(header = list(mapping = aes(color= cross),
+                               scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                                size = 5.5
+                             ))</code></pre>
+<pre><code># set aesthetics (e.g., color, size, position) of labels
+# label: a named list of arguments for labels of nodes. usage same as ggplot2::geom_text(). Set NULL to use default settings, or Set NA to not show.
+cl %&gt;% cl_plot(label = list(mapping =  aes(color = type),
+                            scale   = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"),
+                                                                      guide = guide_legend(ncol = 2))
+                                          ),
+                            nudge_y = -0.3, size = 4
+                           ))</code></pre>
+<pre><code># set figure theme 
+# add:  other gg object to be added to final plot, such as theme().
+theme_use &lt;- theme(legend.position = "top", aspect.ratio = 1,
+                   axis.title = element_blank(),
+                   axis.text = element_blank(),
+                   axis.ticks = element_blank(),
+                   panel.grid = element_blank(),
+                   panel.background = element_blank())
 
-                           
-<span class="co"># set colors, linetypes and size of edges</span>
-<span class="co"># link: a named list of arguments for links. usage same as ggplot2::geom_segment(). Set NULL to use default settings, or Set NA to not show.</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span> link <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span>  <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">src.cross</span>,linetype <span class="op">=</span><span class="va">src.cross</span><span class="op">)</span>,
-                            scale   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Set1"</span><span class="op">)</span><span class="op">)</span>,
-                                           linetype <span class="op">=</span><span class="fu">scale_linetype_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                            size    <span class="op">=</span> <span class="fl">1.5</span>
-                           <span class="op">)</span><span class="op">)</span>
-                            
-<span class="co"># set header styles</span>
-<span class="co"># header:   a named list of arguments for headers. usage same as ggplot2::geom_text(). Set NULL to use default settings, or Set NA to not show.</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span>header <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color<span class="op">=</span> <span class="va">cross</span><span class="op">)</span>,
-                               scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                                size <span class="op">=</span> <span class="fl">5</span>
-                             <span class="op">)</span><span class="op">)</span>
-
-<span class="co"># set figure theme</span>
-<span class="co"># add:  other gg object to be added to final plot, such as theme().</span>
-<span class="va">theme_use</span> <span class="op">&lt;-</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,aspect.ratio <span class="op">=</span> <span class="fl">1</span>,
-                   axis.title <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
-                   axis.text <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
-                   axis.ticks <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
-                   panel.grid <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
-                   panel.background <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span>add<span class="op">=</span><span class="va">theme_use</span><span class="op">)</span></code></pre></div>
+cl %&gt;% cl_plot(add = theme_use)</code></pre>
+<pre><code># combined all aesthetic settings.
+cl %&gt;% cl_plot(cross = list(mapping =  aes(color = type, shape= type),
+                            scale   = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"),
+                                                                      guide = guide_legend(ncol = 2)),
+                                           size  = scale_size_continuous(range = c(1,5), 
+                                                                      guide = guide_legend(ncol = 2)),
+                                           shape  = scale_shape_manual(values = c(13:18),
+                                                                      guide = guide_legend(ncol = 2))
+                                          )
+                           ),
+               link = list(mapping =  aes(x = x + 0.1, xend = xend -0.1,
+                                          color = src.cross,linetype =src.cross, size = src.degree),
+                            scale   = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"),
+                                                                      guide = guide_legend(ncol = 2)),
+                                           size  = scale_size_continuous(range = c(1,3), 
+                                                                      guide = guide_legend(ncol = 2)),
+                                           linetype = scale_linetype_manual(values = c(1:6),
+                                                                      guide = guide_legend(ncol = 2))
+                                           ),
+                            size = 1.5
+                            ),
+               header = list(mapping = aes(color= cross),
+                               scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"),
+                                                                       guide = guide_legend(ncol = 2))),
+                                size = 5.5
+                             ),
+               label = list(nudge_y = -0.3, size = 4
+                           ),
+               add = theme_use
+               )
+</code></pre>
 </div>
 <div id="c-annotation-figure" class="section level4">
 <h4 class="hasAnchor">
 <a href="#c-annotation-figure" class="anchor"></a>c. annotation figure</h4>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># cl_annotation： add annotation figure. </span> 
-<span class="co"># top, bottom, left or  right   : ggplot object</span>
-<span class="co"># top.by, bottom.by, left.by, right.by : name of cross by which to align ggplot</span>
+<pre><code># cl_annotation： add annotation figure. 
+# top, bottom, left or  right   : ggplot object
+# top.by, bottom.by, left.by, right.by : name of cross by which to align ggplot
 
-<span class="va">ann.data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>F<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"F"</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span>,levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"F"</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">10</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,value<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span>,x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
-<span class="va">ann.data</span> <span class="op">%&gt;%</span> <span class="fu">ggplot</span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="cn">F</span>,y<span class="op">=</span><span class="va">value</span><span class="op">)</span><span class="op">)</span><span class="op">+</span><span class="fu">geom_bar</span><span class="op">(</span>stat<span class="op">=</span><span class="st">"identity"</span><span class="op">)</span><span class="op">+</span><span class="fu">coord_flip</span><span class="op">(</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">rgtAnn</span>
+ann.data &lt;- data.frame(F=factor(paste0("F",c(1:10)),levels=paste0("F",c(10:1))),value=sample(size = 10,x=c(1:10)))
+ann.data %&gt;% ggplot(mapping = aes(x=F,y=value))+geom_bar(stat="identity")+coord_flip() -&gt; rgtAnn
 
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span>annotation<span class="op">=</span><span class="fu"><a href="reference/cl_annotation.html">cl_annotation</a></span><span class="op">(</span>right<span class="op">=</span> <span class="va">rgtAnn</span>,right.by <span class="op">=</span><span class="st">"F"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+cl %&gt;% cl_plot(annotation=cl_annotation(right= rgtAnn,right.by ="F"))
+</code></pre>
+</div>
+<div id="d-custom-plots-using-ggplot2" class="section level4">
+<h4 class="hasAnchor">
+<a href="#d-custom-plots-using-ggplot2" class="anchor"></a>d. custom plots using ggplot2</h4>
+<p>Retrieving the metadata for nodes, edges and headers, with which users can plot the network in any way they like.</p>
+<pre><code>
+cl %&gt;% get_cross()   # get node information
+cl %&gt;% get_link()    # get edges information
+cl %&gt;% get_header()  # get header of crosslink object </code></pre>
 </div>
 </div>
 </div>
 <div id="4-examples" class="section level2">
 <h2 class="hasAnchor">
 <a href="#4-examples" class="anchor"></a>4. Examples</h2>
-<p>There are examples used in paper and practical application.</p>
-<div id="1-examples-used-in-paper" class="section level3">
+<p>There are several examples and practical applications.</p>
+<div id="1-examples-used-in-the-paper" class="section level3">
 <h3 class="hasAnchor">
-<a href="#1-examples-used-in-paper" class="anchor"></a>1). examples used in paper</h3>
+<a href="#1-examples-used-in-the-paper" class="anchor"></a>1). examples used in the paper</h3>
+<p>generate a CrossLink object</p>
+<pre><code>cl &lt;- crosslink(demo$nodes, demo$edges, demo$cross.by, odd.rm = F,spaces = "flank")
+cl %&lt;&gt;% set_header(header = c("A","B","C","D","E","F"))</code></pre>
 <div id="a-layout-by-row" class="section level4">
 <h4 class="hasAnchor">
 <a href="#a-layout-by-row" class="anchor"></a>a. layout by row</h4>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/crosslink.html">crosslink</a></span><span class="op">(</span><span class="va">demo</span><span class="op">$</span><span class="va">nodes</span>, <span class="va">demo</span><span class="op">$</span><span class="va">edges</span>, <span class="va">demo</span><span class="op">$</span><span class="va">cross.by</span>, odd.rm <span class="op">=</span> <span class="cn">F</span>,spaces <span class="op">=</span> <span class="st">"flank"</span><span class="op">)</span>
-
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/layout_column.html">layout_row</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-   <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span>cross <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color  <span class="op">=</span> <span class="va">type</span>,fill<span class="op">=</span><span class="va">type</span><span class="op">)</span>,
-                        scale   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span>,
-                                        fill <span class="op">=</span> <span class="fu">scale_fill_manual</span><span class="op">(</span> values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                        size<span class="op">=</span><span class="fl">8</span>,shape<span class="op">=</span><span class="fl">24</span>
-                       <span class="op">)</span>,
-          link   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Set2"</span><span class="op">)</span><span class="op">[</span><span class="fl">7</span><span class="op">]</span>,size<span class="op">=</span><span class="fl">1.5</span>,linetype<span class="op">=</span><span class="fl">12</span><span class="op">)</span>,
-          label  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"white"</span><span class="op">)</span>,
-          header <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color<span class="op">=</span> <span class="va">cross</span><span class="op">)</span>,
-                        scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                        size<span class="op">=</span><span class="fl">5</span>
-                       <span class="op">)</span>,
-          add<span class="op">=</span><span class="va">theme_use</span><span class="op">)</span></code></pre></div>
+<pre><code>cl %&gt;% layout_row() %&gt;%
+  set_header(hjust = 0, vjust = 0.5) %&gt;%
+   cl_plot(cross = list(mapping = aes(fill=type),
+                        scale   = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2")),
+                                        fill = scale_fill_manual( values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                        size=8,shape=24, color = "black"
+                       ),
+          link   = list(mapping = aes(color = src.cross),
+                        size=1.5, linetype=1),
+          label  = list(color="white"),
+          header = list(mapping = aes(color= cross),
+                        scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                        size=5, show.legend = F
+                       )
+          )  %&gt;%
+  cl_void(th = theme(aspect.ratio = 1))
+</code></pre>
 </div>
 <div id="b-layout-by-rotate" class="section level4">
 <h4 class="hasAnchor">
 <a href="#b-layout-by-rotate" class="anchor"></a>b. layout by rotate</h4>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="va">cl</span> <span class="op">%&gt;%</span> 
-   <span class="fu"><a href="reference/tf_affine.html">tf_rotate</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">15</span>, by.each.cross <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">%&gt;%</span>
-   <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span>cross <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">type</span><span class="op">)</span>,
-                       scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                       size<span class="op">=</span><span class="fl">10</span>,shape<span class="op">=</span><span class="fl">16</span>
-                       <span class="op">)</span>,
-          link <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"grey75"</span>,size<span class="op">=</span><span class="fl">1</span>,linetype<span class="op">=</span><span class="fl">15</span><span class="op">)</span>,
-          label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"white"</span><span class="op">)</span>,
-          header <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color<span class="op">=</span> <span class="va">cross</span><span class="op">)</span>,
-                       scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                       size<span class="op">=</span><span class="fl">5</span>
-                       <span class="op">)</span>,
-          add<span class="op">=</span><span class="va">theme_use</span><span class="op">)</span>
-          </code></pre></div>
+<pre><code>cl %&gt;% 
+   tf_rotate(angle = 10, by.each.cross = T) %&gt;%
+   cl_plot(cross = list(mapping = aes(fill = type),
+                       scale = list(fill = scale_fill_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                       size=10, shape=24, color = "black"
+                       ),
+          link   = list(mapping = aes(color = src.cross),
+                        size=1.5, linetype=1),
+          label = list(color="white"),
+          header = list(mapping = aes(color= cross),
+                       scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                       size=5, show.legend = F
+                       )
+          )  %&gt;%
+  cl_void(th = theme(aspect.ratio = 1))
+
+          </code></pre>
 </div>
 <div id="c-layout-by-polygon" class="section level4">
 <h4 class="hasAnchor">
 <a href="#c-layout-by-polygon" class="anchor"></a>c. layout by polygon</h4>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/layout_column.html">layout_polygon</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-   <span class="co">#tf_rotate(angle = 45, by.each.cross = F) %&gt;%  # If the grouping is 4, rotate by this parameter and change from diamond to square </span>
-   <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span>cross <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">type</span><span class="op">)</span>,
-                        scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                        size<span class="op">=</span><span class="fl">10</span>,shape<span class="op">=</span><span class="fl">16</span>
-                       <span class="op">)</span>,
-           link  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"orange"</span>,size<span class="op">=</span><span class="fl">2</span>,linetype<span class="op">=</span><span class="fl">15</span>,geom<span class="op">=</span><span class="st">"curve"</span><span class="op">)</span>,
-           label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"white"</span><span class="op">)</span>,
-           header<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color<span class="op">=</span> <span class="va">cross</span><span class="op">)</span>,
-                        scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                        size<span class="op">=</span><span class="fl">5</span>
-                        <span class="op">)</span>,
-           add  <span class="op">=</span>  <span class="va">theme_use</span> <span class="op">)</span></code></pre></div>
+<pre><code>cl %&gt;% layout_polygon() %&gt;%
+   #tf_rotate(angle = 45, by.each.cross = F) %&gt;%  # If the grouping is 4, rotate by this parameter and change from diamond to square 
+   cl_plot(cross = list(mapping = aes(color = type),
+                        scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                        size=10,shape=16
+                       ),
+           link   = list(geom = "curve",
+                         mapping = aes(color = src.cross),
+                         size=1.5, linetype=1
+                         ),
+           label = list(color="white"),
+           header= list(mapping = aes(color= cross),
+                        scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                        size=5
+                        )
+          )  %&gt;%
+  cl_void(th = theme(aspect.ratio = 1))
+</code></pre>
 </div>
 <div id="d-layout-by-hive" class="section level4">
 <h4 class="hasAnchor">
 <a href="#d-layout-by-hive" class="anchor"></a>d. layout by hive</h4>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/layout_column.html">layout_hive</a></span><span class="op">(</span>angles<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">60</span>,<span class="fl">6</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="co">#length of angles must be same with the numbers of groups</span>
-       <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span>cross <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">type</span><span class="op">)</span>,
-                       scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                       size<span class="op">=</span><span class="fl">10</span>,shape<span class="op">=</span><span class="fl">18</span>
-                       <span class="op">)</span>,
-               link  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"purple"</span>,size<span class="op">=</span><span class="fl">1</span>,linetype<span class="op">=</span><span class="fl">15</span><span class="op">)</span>,
-               label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"white"</span><span class="op">)</span>,
-               header<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color<span class="op">=</span> <span class="va">cross</span><span class="op">)</span>,
-                            scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                            size<span class="op">=</span><span class="fl">5</span>
-                            <span class="op">)</span>,
-               add   <span class="op">=</span> <span class="va">theme_use</span> <span class="op">)</span></code></pre></div>
+<pre><code>cl %&gt;% layout_hive(angles=rep(60,6)) %&gt;% #length of angles must be same with the numbers of groups
+       cl_plot(cross = list(mapping = aes(color = type),
+                       scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                       size=10,shape=18
+                       ),
+               link   = list(geom = "curve", curvature = -0.5,
+                             mapping = aes(color = src.cross),
+                             size=1.5, linetype=1),
+               label = list(color="white"),
+               header= list(mapping = aes(color= cross),
+                            scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                            size=5
+                            )
+          )  %&gt;%
+  cl_void(th = theme(aspect.ratio = 1))</code></pre>
 </div>
 <div id="e-layout-by-arc" class="section level4">
 <h4 class="hasAnchor">
 <a href="#e-layout-by-arc" class="anchor"></a>e. layout by arc</h4>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/layout_column.html">layout_arc</a></span><span class="op">(</span>angles<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">60</span>,<span class="fl">120</span>,<span class="fl">180</span><span class="op">)</span>,crosses<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"D"</span>,<span class="st">"E"</span>,<span class="st">"F"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="co">#length of angles must be same with the numbers of crosses</span>
-       <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span>cross <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">type</span><span class="op">)</span>,
-                            scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                            size<span class="op">=</span><span class="fl">10</span>,shape<span class="op">=</span><span class="fl">18</span>
-                           <span class="op">)</span>,
-               link  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"orange"</span>,size<span class="op">=</span><span class="fl">1</span>,linetype<span class="op">=</span><span class="fl">3</span><span class="op">)</span>,<span class="co">#,geom="curve"</span>
-               label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"white"</span><span class="op">)</span>,
-               header<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color<span class="op">=</span> <span class="va">cross</span><span class="op">)</span>,
-                            scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                            size<span class="op">=</span><span class="fl">5</span>
-                           <span class="op">)</span>,
-               add   <span class="op">=</span>  <span class="va">theme_use</span><span class="op">)</span></code></pre></div>
+<pre><code>cl %&gt;% layout_arc(angles = 45) %&gt;% #length of angles must be same with the numbers of crosses
+       cl_plot(cross = list(mapping = aes(color = type),
+                            scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                            size=10, shape=18
+                           ),
+               link   = list(mapping = aes(color = src.cross),
+                             size=1, linetype=2),
+               label = list(color="white"),
+               header= list(mapping = aes(color= cross),
+                            scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                            size=5
+                           )
+               ) %&gt;%
+  cl_void(th = theme(aspect.ratio = 1))
+</code></pre>
 </div>
 <div id="f-layout-by-combination-of-several-methods" class="section level4">
 <h4 class="hasAnchor">
 <a href="#f-layout-by-combination-of-several-methods" class="anchor"></a>f. layout by combination of several methods</h4>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="co"># demo data</span>
-<span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">5</span>
-<span class="va">demo</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gen_demo.html">gen_demo</a></span><span class="op">(</span>n_cross <span class="op">=</span> <span class="va">n</span>, n_node <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">n</span>, <span class="va">n</span><span class="op">)</span>, n_link <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">n</span>, <span class="va">n</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">66</span><span class="op">)</span>
-<span class="va">nodes</span> <span class="op">&lt;-</span> <span class="va">demo</span><span class="op">$</span><span class="va">nodes</span>
-<span class="va">edges</span> <span class="op">&lt;-</span> <span class="va">demo</span><span class="op">$</span><span class="va">edges</span>
-<span class="va">cross.by</span> <span class="op">&lt;-</span> <span class="va">demo</span><span class="op">$</span><span class="va">cross.by</span>
-
-
-<span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/crosslink.html">crosslink</a></span><span class="op">(</span><span class="va">nodes</span>, <span class="va">edges</span>, <span class="va">cross.by</span>, odd.rm <span class="op">=</span> <span class="cn">F</span><span class="op">)</span>
-<span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_header.html">set_header</a></span><span class="op">(</span><span class="va">cl</span>,header <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span>,<span class="st">"E"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="va">cl</span> <span class="op">%&gt;%</span> 
-   <span class="fu"><a href="reference/layout_column.html">layout_polygon</a></span><span class="op">(</span>crosses <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-   <span class="fu"><a href="reference/tf_affine.html">tf_rotate</a></span><span class="op">(</span>crosses<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span><span class="op">)</span>,angle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">45</span>,<span class="fl">4</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-   <span class="fu"><a href="reference/tf_affine.html">tf_shift</a></span><span class="op">(</span>x<span class="op">=</span><span class="fl">0.8</span><span class="op">*</span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>,y<span class="op">=</span><span class="fl">0.05</span>,crosses<span class="op">=</span><span class="st">"E"</span>,layout<span class="op">=</span><span class="st">"default"</span><span class="op">)</span> <span class="op">-&gt;</span><span class="va">cl</span>
-
-<span class="va">cl</span> <span class="op">%&gt;%</span>
-   <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span>cross <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">type</span><span class="op">)</span>,
-                       scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                       size<span class="op">=</span><span class="fl">10</span>,shape<span class="op">=</span><span class="fl">19</span>
-                       <span class="op">)</span>,
-          link   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"grey75"</span>,size<span class="op">=</span><span class="fl">1</span>,linetype<span class="op">=</span><span class="fl">3</span><span class="op">)</span>,
-          label  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"white"</span><span class="op">)</span>,
-          header <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color<span class="op">=</span> <span class="va">cross</span><span class="op">)</span>,
-                       scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                       size<span class="op">=</span><span class="fl">5</span>
-                       <span class="op">)</span>,
-           add   <span class="op">=</span>  <span class="va">theme_use</span><span class="op">)</span>
-           </code></pre></div>
+<pre><code>cl %&gt;% 
+  layout_polygon(crosses = c("A","B","C","D"), layout_save = "combined") %&gt;%
+  layout_row(crosses = c("E", "F"), layout_save = "combined") %&gt;% 
+  tf_rotate(crosses=c("A","B","C","D"), x = 0, y = 0, angle = -45) %&gt;% 
+  tf_scale(crosses = c("E", "F"), x = 0.5, y = 0.5, scale.x = sqrt(2), scale.y = 3) %&gt;%
+  cl_align(crosses.1 = c("A","B","C","D"), crosses.2 = c("E", "F"), 
+           align.x = T, align.y = T, 
+           anchor.1 = c(0.5, 0),
+           anchor.2 = c(0.5, 2)) %&gt;% 
+   cl_plot(cross = list(mapping = aes(color = type),
+                       scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                       size=10,shape=19
+                       ),
+          link   = list(color="grey75",size=1,linetype=3),
+          label  = list(color="white"),
+          header = list(mapping = aes(color= cross),
+                       scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2"))),
+                       size=5
+                       )
+   ) %&gt;%
+  cl_void(th = theme(aspect.ratio = 1))
+           </code></pre>
 </div>
 </div>
 <div id="2-examples-of-complex-figure" class="section level3">
 <h3 class="hasAnchor">
 <a href="#2-examples-of-complex-figure" class="anchor"></a>2). examples of complex figure</h3>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://had.co.nz/reshape">reshape</a></span><span class="op">)</span>
-<span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">theme</span><span class="op">(</span>axis.text <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
-        axis.line.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
-        axis.ticks.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span><span class="va">theme_use2</span>
+<pre><code><a href="https://dplyr.tidyverse.org">library(dplyr)
+library(reshape)
+theme_classic() +
+  theme(axis.text = element_blank(),
+        axis.line.x = element_blank(),
+        axis.ticks.x = element_blank()) -&gt;theme_use2
 
 
-<span class="co">## crosslink project</span>
-<span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/crosslink.html">crosslink</a></span><span class="op">(</span><span class="va">example</span><span class="op">$</span><span class="va">nodes</span>,<span class="va">example</span><span class="op">$</span><span class="va">edges</span>,cross.by<span class="op">=</span><span class="st">"type"</span><span class="op">)</span>
+## crosslink project
+cl &lt;- crosslink(example$nodes,example$edges,cross.by="type")
 
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="op">)</span>
+cl %&gt;% cl_plot()
 
-<span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_header.html">set_header</a></span><span class="op">(</span><span class="va">cl</span>,header<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="reference/get_cross.html">get_cross</a></span><span class="op">(</span><span class="va">cl</span><span class="op">)</span><span class="op">$</span><span class="va">cross</span><span class="op">)</span><span class="op">)</span>
+cl &lt;- set_header(cl,header=unique(get_cross(cl)$cross))
 
-<span class="va">cl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="reference/layout_column.html">layout_polygon</a></span><span class="op">(</span>crosses <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Mir"</span>,<span class="st">"Meth"</span>,<span class="st">"Gene"</span>,<span class="st">"Drug"</span><span class="op">)</span>,layout_based <span class="op">=</span> <span class="st">"default"</span><span class="op">)</span> <span class="op">%&gt;%</span>
-       <span class="fu"><a href="reference/tf_affine.html">tf_rotate</a></span><span class="op">(</span>crosses<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Mir"</span>,<span class="st">"Meth"</span>,<span class="st">"Gene"</span>,<span class="st">"Drug"</span><span class="op">)</span>,angle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">45</span>,<span class="fl">4</span><span class="op">)</span>,layout<span class="op">=</span><span class="st">"default"</span><span class="op">)</span> <span class="op">%&gt;%</span>
-       <span class="fu"><a href="reference/tf_affine.html">tf_shift</a></span><span class="op">(</span>x<span class="op">=</span><span class="fl">0.2</span><span class="op">*</span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>,y<span class="op">=</span><span class="fl">1.5</span>,crosses<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Mir"</span>,<span class="st">"Meth"</span><span class="op">)</span>,layout<span class="op">=</span><span class="st">"default"</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">cl</span>
+cl %&gt;% layout_polygon(crosses = c("Mir","Meth","Gene","Drug"),layout_based = "default") %&gt;%
+       tf_rotate(crosses= c("Mir","Meth","Gene","Drug"),angle = rep(45,4),layout="default") %&gt;%
+       tf_shift(x=0.2*(-1),y=1.5,crosses=c("Mir","Meth"),layout="default") -&gt; cl
 
 
-<span class="co"># plot annotation</span>
-<span class="va">top</span> <span class="op">&lt;-</span> <span class="va">nodes</span><span class="op">$</span><span class="va">id</span><span class="op">[</span><span class="va">nodes</span><span class="op">$</span><span class="va">type</span> <span class="op">==</span> <span class="st">"Mir"</span><span class="op">]</span> <span class="co"># set the order as you like</span>
-<span class="va">bottom</span> <span class="op">&lt;-</span> <span class="va">nodes</span><span class="op">$</span><span class="va">id</span><span class="op">[</span><span class="va">nodes</span><span class="op">$</span><span class="va">type</span> <span class="op">==</span> <span class="st">"Gene"</span><span class="op">]</span> <span class="co"># set the order as you like</span>
-<span class="va">right</span> <span class="op">&lt;-</span> <span class="va">nodes</span><span class="op">$</span><span class="va">id</span><span class="op">[</span><span class="va">nodes</span><span class="op">$</span><span class="va">type</span> <span class="op">==</span> <span class="st">"Meth"</span><span class="op">]</span> <span class="co"># set the order as you like</span>
+# plot annotation
+top &lt;- nodes$id[nodes$type == "Mir"] # set the order as you like
+bottom &lt;- nodes$id[nodes$type == "Gene"] # set the order as you like
+right &lt;- nodes$id[nodes$type == "Meth"] # set the order as you like
 
-<span class="co"># Top plot</span>
-<span class="va">topAnn</span> <span class="op">&lt;-</span>  <span class="va">mirData</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>mir_f <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">mir</span>, <span class="va">top</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">ggplot</span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">mir</span>,y<span class="op">=</span><span class="op">-</span><span class="va">lfc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_bar</span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"#E7298A"</span>,
-           stat <span class="op">=</span> <span class="st">"identity"</span>,
-           width <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"log2(Fold Change)"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="va">theme_use2</span>
-<span class="va">topAnn</span>
+# Top plot
+topAnn &lt;-  mirData %&gt;%
+  mutate(mir_f = factor(mir, top)) %&gt;%
+  ggplot(mapping = aes(x=mir,y=-lfc)) +
+  geom_bar(fill = "#E7298A",
+           stat = "identity",
+           width = 0.5) + 
+  labs(x = NULL, y = "log2(Fold Change)") +
+  theme_use2
+topAnn
 
-<span class="co"># Bottom plot</span>
-<span class="va">botAnn</span> <span class="op">&lt;-</span> <span class="va">geneData</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>meth_f <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">gene</span>, <span class="va">bottom</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">ggplot</span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">gene</span>,y<span class="op">=</span><span class="op">-</span><span class="va">lfc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_bar</span><span class="op">(</span>fill <span class="op">=</span>  <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,<span class="fl">7</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span><span class="op">]</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,
-           stat <span class="op">=</span> <span class="st">"identity"</span>,
-           width <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Difference"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="va">theme_use2</span>
-<span class="va">botAnn</span>
+# Bottom plot
+botAnn &lt;- geneData %&gt;%
+  mutate(meth_f = factor(gene, bottom)) %&gt;%
+  ggplot(mapping = aes(x=gene,y=-lfc)) +
+  geom_bar(fill =  RColorBrewer::brewer.pal(8, "Dark2")[c(1:5,7:9)][2],
+           stat = "identity",
+           width = 0.5) +
+  labs(x = NULL, y = "Difference") +
+  theme_use2
+botAnn
 
-<span class="co"># right plot</span>
-<span class="va">rgtAnn</span> <span class="op">&lt;-</span> <span class="va">methData</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>mir_f <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">meth</span>, <span class="va">right</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">ggplot</span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">meth</span>,y<span class="op">=</span><span class="op">-</span><span class="va">lfc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_bar</span><span class="op">(</span>fill <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,<span class="fl">7</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span><span class="op">]</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>,
-           stat <span class="op">=</span> <span class="st">"identity"</span>, 
-           width <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"log2(Fold Change)"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="va">theme_use2</span> <span class="op">+</span>
-  <span class="fu">coord_flip</span><span class="op">(</span><span class="op">)</span>
+# right plot
+rgtAnn &lt;- methData %&gt;%
+  mutate(mir_f = factor(meth, right)) %&gt;%
+  ggplot(mapping = aes(x=meth,y=-lfc)) +
+  geom_bar(fill = RColorBrewer::brewer.pal(8, "Dark2")[c(1:5,7:9)][3],
+           stat = "identity", 
+           width = 0.5) +
+  labs(x = NULL, y = "log2(Fold Change)") +
+  theme_use2 +
+  coord_flip()
 
-<span class="va">rgtAnn</span>
+rgtAnn
 
-<span class="co"># left plot</span>
-<span class="va">mat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span>, <span class="fl">64</span>, replace <span class="op">=</span> <span class="cn">T</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">cl</span><span class="op">@</span><span class="va">cross</span><span class="op">$</span><span class="va">Drug</span><span class="op">)</span>
-<span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/reshape/man/melt-24.html">melt</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">X1</span>, <span class="va">X2</span>, fill <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
-     <span class="fu">geom_tile</span><span class="op">(</span>color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span><span class="op">+</span> 
-     <span class="fu">scale_fill_gradient2</span><span class="op">(</span>low <span class="op">=</span> <span class="st">"blue"</span>, high <span class="op">=</span> <span class="st">"darkgreen"</span>, mid <span class="op">=</span> <span class="st">"white"</span>,midpoint <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span> 
-     <span class="fu">xlab</span><span class="op">(</span><span class="st">""</span><span class="op">)</span><span class="op">+</span><span class="fu">ylab</span><span class="op">(</span><span class="st">""</span><span class="op">)</span><span class="op">+</span><span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span><span class="op">+</span>
-     <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span>,
-          axis.line <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
-          axis.ticks <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
-           axis.text <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">lftAnno</span>
-<span class="va">lftAnno</span>
+# left plot
+mat = matrix(sample(1:100, 64, replace = T), nrow = 8)
+colnames(mat)=as.character(cl@cross$Drug)
+ggplot(data = melt(mat), aes(X1, X2, fill = value))+
+     geom_tile(color = "white")+ 
+     scale_fill_gradient2(low = "blue", high = "darkgreen", mid = "white",midpoint = 0) + 
+     xlab("")+ylab("")+theme_classic()+
+     theme(legend.position = "right",
+          axis.line = element_blank(),
+          axis.ticks = element_blank(),
+           axis.text = element_blank()) -&gt; lftAnno
+lftAnno</a></code></pre>
+<p>Combine network plot and four annotation plots</p>
+<pre><code><a href="reference/cl_plot.html">cl_plot(cl,
+       annotation=cl_annotation(top = topAnn,top.by = "Mir",top.height = 0.5,
+                                bottom = botAnn,bottom.by = "Gene",bottom.height = 0.5,
+                                right = rgtAnn,right.by ="Meth",right.width = 0.5,
+                                left = lftAnno,left.by = "Drug" ,left.width = 0.5),
+       cross = list(mapping = aes(color = type,size=degree,shape=type),
+       scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Dark2")[c(1:5,7:9)]),
+                    shape = scale_shape_manual(values = 15:23),
+                    size  = scale_size_continuous(range=c(1,5)))),
+       link  = list(mapping = aes(color = type,linetype=type,size=cor),
+                    scale = list(color = scale_color_manual(values = RColorBrewer::brewer.pal(8, "Set1")[c(1:5,7:9)]),
+                                 linetype=scale_linetype_manual(values = c(1:4)),
+                                 size=scale_size(range = c(1,2)))),
+       header=NA,
+       label = list(color="black"
+                    ,angle=c(rep(0,8),rep(90,10),rep(0,10),rep(90,6))
+                    ,nudge_x=c(rep(-2,8),rep(0,10),rep(2,10),rep(0,6))
+                    ,nudge_y=c(rep(0,8),rep(-2,10),rep(0,10),rep(2,6))),
+       add   =  theme(panel.background = element_blank(),
+                      axis.title = element_blank(),
+                      panel.grid = element_blank(),
+                      axis.ticks = element_blank(),
+                      axis.text = element_blank()))
 
-<span class="fu"><a href="reference/cl_plot.html">cl_plot</a></span><span class="op">(</span><span class="va">cl</span>,
-       annotation<span class="op">=</span><span class="fu"><a href="reference/cl_annotation.html">cl_annotation</a></span><span class="op">(</span>top <span class="op">=</span> <span class="va">topAnn</span>,top.by <span class="op">=</span> <span class="st">"Mir"</span>,top.height <span class="op">=</span> <span class="fl">0.5</span>,
-                                bottom <span class="op">=</span> <span class="va">botAnn</span>,bottom.by <span class="op">=</span> <span class="st">"Gene"</span>,bottom.height <span class="op">=</span> <span class="fl">0.5</span>,
-                                right <span class="op">=</span> <span class="va">rgtAnn</span>,right.by <span class="op">=</span><span class="st">"Meth"</span>,right.width <span class="op">=</span> <span class="fl">0.5</span>,
-                                left <span class="op">=</span> <span class="va">lftAnno</span>,left.by <span class="op">=</span> <span class="st">"Drug"</span> ,left.width <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,
-       cross <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span> mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">type</span>,size<span class="op">=</span><span class="va">degree</span>,shape<span class="op">=</span><span class="va">type</span><span class="op">)</span>,
-       scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Dark2"</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,<span class="fl">7</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>,
-       shape <span class="op">=</span> <span class="fu">scale_shape_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fl">15</span><span class="op">:</span><span class="fl">23</span><span class="op">)</span>,
-       size  <span class="op">=</span> <span class="fu">scale_size_continuous</span><span class="op">(</span>range<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-       link  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">type</span>,linetype<span class="op">=</span><span class="va">type</span>,size<span class="op">=</span><span class="va">cor</span><span class="op">)</span>,
-                    scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">8</span>, <span class="st">"Set1"</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,<span class="fl">7</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>,
-                                linetype<span class="op">=</span><span class="fu">scale_linetype_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span>,
-                                size<span class="op">=</span><span class="fu">scale_size</span><span class="op">(</span>range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.5</span>,<span class="fl">1.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-       header<span class="op">=</span><span class="cn">NA</span>,
-       label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"black"</span>
-                    ,angle<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">8</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">90</span>,<span class="fl">10</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">10</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">90</span>,<span class="fl">6</span><span class="op">)</span><span class="op">)</span>
-                    ,nudge_x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>,<span class="fl">8</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">10</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">10</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">6</span><span class="op">)</span><span class="op">)</span>
-                    ,nudge_y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">8</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>,<span class="fl">10</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">10</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">6</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-       add   <span class="op">=</span>  <span class="fu">theme</span><span class="op">(</span>panel.background <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,axis.title <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
-                      panel.grid <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
-                      axis.ticks <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
-                      axis.text <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
-</code></pre></div>
+</a></code></pre>
 </div>
 </div>
 </div>
+
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -503,22 +563,6 @@
 <li>
 <a href="https://www.r-project.org/Licenses/GPL-2">GPL-2</a> | file <a href="LICENSE-text.html">LICENSE</a>
 </li>
-</ul>
-</div>
-<div class="Catalogue">
-<h2>Catalogue</h2>
-<ul class="list-unstyled">
-<li><a href="#1-installation" >1. Installation </a></li>
-<li><a href="#2-quick-start">2. Quick start</a></li>
-<li><a href="#3-step-by-step">3. Step by step</a></li>
-<li>&nbsp; &nbsp;&nbsp; <a href="#1-input-data">Input data</a></li>
-<li>&nbsp; &nbsp;&nbsp; <a href="#2-generate-crosslink-class">Generate CrossLink class</a></li>
-<li>&nbsp; &nbsp;&nbsp; <a href="#3-coordinate-transformation">Coordinate transformation</a></li>
-<li>&nbsp; &nbsp;&nbsp; <a href="#4-layout-modules">Layout modules</a></li>
-<li>&nbsp; &nbsp;&nbsp; <a href="#5-plotting-modules"> Plotting modules</a></li>
-<li><a href="#4-examples">4. Examples</a></li>
-<li>&nbsp; &nbsp;&nbsp; <a href="#1-examples-used-in-paper">examples used in paper</a></li>
-<li>&nbsp; &nbsp;&nbsp; <a href="#2-examples-of-complex-figure">examples of complex figure</a></li>
 </ul>
 </div>
 <div class="developers">
