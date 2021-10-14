@@ -42,7 +42,7 @@ CrossLink <- setClass(
 #'
 #' Achieve a initialized CrossLink object by providing nodes, edges and cross.by.
 #'
-#' @param nodes a data frame with unique keys in the 1st (settable by \code{key.by}) column and metadata (used for aesthetic of nodes) in the other columns
+#' @param nodes a data frame with unique keys in the 1st (settable by \code{key.by}) column and metadata (used for aesthetic of nodes) in the other columns.
 #' @param edges a data frame with source and target nodes in the first two (settable by \code{src.by} and \code{tar.by}) columns and other metadata.
 #' @param cross.by the name of a column in \code{nodes}, by which nodes will be grouped into different crosses.
 #' To control the order of crosses and the order of nodes, set factor levels for the corresponding column in \code{nodes}. see \code{\link{factor}} or [forcats::fct_relevel()]
@@ -60,6 +60,7 @@ CrossLink <- setClass(
 #' @param odd.rm remove odd nodes that are not included in edges (without links).
 #' @md
 #'
+#' @details IMPORTANT! The colnames of 'node', 'cross', 'node.type', 'x', 'y', 'degree' MUST NOT BE included in nodes and edges!
 #' @return a CrossLink object
 #' @export
 #'
@@ -500,8 +501,8 @@ get_link <- function(object, layout = NULL){
   node_data <- object@nodes
   link_data$source <- link_data[[object@params$src.by]]
   link_data$target <- link_data[[object@params$tar.by]]
-  link_data$src.degree <- node_data$degree[match(link_data$source, node_data[[cl@params$key.by]])]
-  link_data$tar.degree <- node_data$degree[match(link_data$target, node_data[[cl@params$key.by]])]
+  link_data$src.degree <- node_data$degree[match(link_data$source, node_data[[object@params$key.by]])]
+  link_data$tar.degree <- node_data$degree[match(link_data$target, node_data[[object@params$key.by]])]
   link_data[c("x", "y")] <- cross_coord[match(link_data$source, cross_coord$node), c("x", "y")]
   link_data[c("xend", "yend")]<- cross_coord[match(link_data$target, cross_coord$node), c("x", "y")]
   return(link_data)

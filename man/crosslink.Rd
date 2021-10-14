@@ -19,7 +19,7 @@ crosslink(
 )
 }
 \arguments{
-\item{nodes}{a data frame with unique keys in the 1st (settable by \code{key.by}) column and metadata (used for aesthetic of nodes) in the other columns}
+\item{nodes}{a data frame with unique keys in the 1st (settable by \code{key.by}) column and metadata (used for aesthetic of nodes) in the other columns.}
 
 \item{edges}{a data frame with source and target nodes in the first two (settable by \code{src.by} and \code{tar.by}) columns and other metadata.}
 
@@ -50,6 +50,9 @@ a CrossLink object
 }
 \description{
 Achieve a initialized CrossLink object by providing nodes, edges and cross.by.
+}
+\details{
+IMPORTANT! The colnames of 'node', 'cross', 'node.type', 'x', 'y', 'degree' MUST NOT BE included in nodes and edges!
 }
 \examples{
 
