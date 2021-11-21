@@ -187,7 +187,7 @@ tf_scale <- function(
 #' Transformation by a given function
 #'
 #' @param object a CrossLink object
-#' @param fun function for coordinate transformation
+#' @param fun function for coordinate transformation; return data.frame if along is 'xy', otherwise return vector.
 #' @param along another axis will changed along this given axis. Such as, if along = "x", transformation function will change y values along x axis and keep x values asis.
 #' @param layout layout name to save
 #' @param xrange.from,yrange.from the range to be scaled from before transformation by function

@@ -20,7 +20,7 @@ tf_fun(
 \arguments{
 \item{object}{a CrossLink object}
 
-\item{fun}{function for coordinate transformation}
+\item{fun}{function for coordinate transformation; return data.frame if along is 'xy', otherwise return vector.}
 
 \item{along}{another axis will changed along this given axis. Such as, if along = "x", transformation function will change y values along x axis and keep x values asis.}
 

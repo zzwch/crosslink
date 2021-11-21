@@ -227,7 +227,7 @@ gen_demo <- function(n_cross = 2, n_link = c(10), n_node = c(3,4), seed = 6){
       tar = sample(crosses[[i + 1]], n_link[i], replace = T)
     ))
   }
-  return(list(nodes = nodes, edges = edges, cross.by = "type"))
+  return(crosslink(nodes = nodes, edges = edges, cross.by = "type"))
 }
 
 
