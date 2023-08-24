@@ -32,6 +32,3 @@ a list of arguments
 \description{
 Helper for annotation in cl_plot
 }
-\examples{
-
-}

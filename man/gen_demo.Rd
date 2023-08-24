@@ -21,6 +21,3 @@ a CrossLink object
 \description{
 generate a toy CrossLink object
 }
-\examples{
-
-}

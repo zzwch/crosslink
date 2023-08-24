@@ -32,12 +32,6 @@ cl_align(
 
 \item{layout}{which layout coordinates to be used}
 }
-\value{
-
-}
 \description{
 Align crosses in different layouts
-}
-\examples{
-
 }

@@ -32,7 +32,4 @@ project points to a circle
 Here, for sources of x or y, projected points will be at the right or up half circle;
 for sources of -x or -y, projected points will be at the left or down half circle
 }
-\examples{
-
-}
 \keyword{internal}

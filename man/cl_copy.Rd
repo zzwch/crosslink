@@ -23,6 +23,3 @@ an updated CrossLink object
 \description{
 copy layout
 }
-\examples{
-
-}

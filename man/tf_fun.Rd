@@ -40,6 +40,3 @@ an updated CrossLink object
 \description{
 Transformation by a given function
 }
-\examples{
-
-}

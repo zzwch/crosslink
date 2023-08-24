@@ -12,6 +12,3 @@ show_aes(object)
 \description{
 show available aesthetic
 }
-\examples{
-
-}

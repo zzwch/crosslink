@@ -21,9 +21,3 @@ a ggplot2 object
 \description{
 Plot a CrossLink object
 }
-\details{
-
-}
-\examples{
-
-}

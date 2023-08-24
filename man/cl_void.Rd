@@ -17,6 +17,3 @@ an updated ggplot object
 \description{
 a theme for crosslink plot
 }
-\examples{
-
-}

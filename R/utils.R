@@ -61,7 +61,7 @@ todataframe_by_list <- function(list){
 #' nullna_default(NULL, c(1,2))
 #'
 nullna_default <- function(x, default) {
-  if(is.na(x) || is.null(x)) return(default) else return(x)
+  if(any(is.na(x)) || any(is.null(x))) return(default) else return(x)
 }
 
 #' cut a segment defined by a range in 1D coordinate into n pieces

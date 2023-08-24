@@ -26,6 +26,3 @@ This function will only change default layout.
 So, it is recommended to use this function after \code{\link{crosslink}},
 and before transformation.
 }
-\examples{
-
-}

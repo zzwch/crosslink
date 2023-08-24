@@ -66,6 +66,3 @@ Predefined layouts
 
 \code{layout_row} and \code{layout_column} will always based on \code{default} layout.
 }
-\examples{
-
-}

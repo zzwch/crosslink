@@ -23,6 +23,3 @@ data.frame
 \description{
 Convert relative coordinates
 }
-\examples{
-
-}

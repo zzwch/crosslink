@@ -41,6 +41,3 @@ Plot a CrossLink object
 \details{
 For link, cross, label, header: "geom" is restricted for setting geom function, such as list(geom = "arc") for link.
 }
-\examples{
-
-}

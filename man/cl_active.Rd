@@ -24,7 +24,3 @@ an updated CrossLink object
 \description{
 Retrieve and Set active layout
 }
-\examples{
-
-
-}

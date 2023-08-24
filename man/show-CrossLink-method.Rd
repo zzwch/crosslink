@@ -15,7 +15,4 @@ No value is returned.
 \description{
 Print the CrossLink object
 }
-\examples{
-
-}
 \keyword{internal}

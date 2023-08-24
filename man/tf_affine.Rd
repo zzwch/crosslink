@@ -78,7 +78,3 @@ rotate: \code{tf_rotate}, flip: \code{tf_flip}, shift: \code{tf_shift} shear: \c
 }
 }
 }
-\examples{
-
-
-}

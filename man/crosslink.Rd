@@ -54,6 +54,3 @@ Achieve a initialized CrossLink object by providing nodes, edges and cross.by.
 \details{
 IMPORTANT! The colnames of 'node', 'cross', 'node.type', 'x', 'y', 'degree' MUST NOT BE included in nodes and edges!
 }
-\examples{
-
-}

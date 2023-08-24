@@ -21,6 +21,3 @@ a vector of values
 \description{
 Retrieve coordinates of nodes
 }
-\examples{
-
-}

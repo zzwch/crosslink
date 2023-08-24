@@ -24,6 +24,3 @@ range of X or Y axis for the given layout
 \description{
 Retrieve ranges of X or Y axis
 }
-\examples{
-
-}

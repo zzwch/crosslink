@@ -26,7 +26,4 @@ angles in radian
 \description{
 get arc-trigonometric values in periods
 }
-\examples{
-
-}
 \keyword{internal}

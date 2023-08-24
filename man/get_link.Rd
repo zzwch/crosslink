@@ -17,6 +17,3 @@ data.frame
 \description{
 Retrieve 2D coordinates of links
 }
-\examples{
-
-}

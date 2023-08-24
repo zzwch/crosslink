@@ -31,6 +31,3 @@ an updated CrossLink object
 \description{
 Set Headers for each cross
 }
-\examples{
-
-}

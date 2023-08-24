@@ -15,6 +15,3 @@ names of available layouts
 \description{
 Retrieve available layout names
 }
-\examples{
-
-}
